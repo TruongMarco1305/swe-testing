@@ -1,0 +1,11 @@
+test_case_id,username,password,firstname,lastname,email,expected_result
+TC-001-001,usr001_uuuuuuuuuu,XuanSang12@,ffffffffff,llllllllll,usr001_nom@test.com,success
+TC-001-002,,XuanSang12@,ffffffffff,llllllllll,usr002_nom@test.com,fail
+TC-001-003,usr003_u,XuanSang12@,ffffffffff,llllllllll,usr003_nom@test.com,success
+TC-001-004,usr004_uu,XuanSang12@,ffffffffff,llllllllll,usr004_nom@test.com,success
+TC-001-005,usr008_uuuuuuuuuu,Ab1!cD2,ffffffffff,llllllllll,usr008_nom@test.com,fail
+TC-001-006,usr009_uuuuuuuuuu,Ab1!cD2@ab,ffffffffff,llllllllll,usr009_nom@test.com,success
+TC-001-007,usr010_uuuuuuuuuu,Ab1!cD2@abc,ffffffffff,llllllllll,usr010_nom@test.com,success
+TC-001-008,usr011_uuuuuuuuuu,Ab1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9,ffffffffff,llllllllll,usr011_nom@test.com,success
+TC-001-009,usr012_uuuuuuuuuu,Ab1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=,ffffffffff,llllllllll,usr012_nom@test.com,success
+TC-001-010,usr013_uuuuuuuuuu,Ab1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=sT0+uVwXyZAb1!cD2@eF3#gH4$iJ5%kL6^mN7&oP8*qR9=s,ffffffffff,llllllllll,usr013_nom@test.com,fail
