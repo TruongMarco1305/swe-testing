@@ -145,8 +145,15 @@ class TestAddUserLevel1(unittest.TestCase):
         u.clear()
         u.send_keys(row["username"])
 
-        # Password via JS (mirrors krecorder runScript)
-        self._set_password(row["password"])
+        # Password: "__generate__" → tick the "Generate password and notify user"
+        # checkbox (mirrors krecorder TC-001-033 `click id=id_createpassword`).
+        # Otherwise use JS runScript to bypass the readonly attribute.
+        if row["password"].strip() == "__generate__":
+            cb = driver.find_element(By.ID, "id_createpassword")
+            if not cb.is_selected():
+                driver.execute_script("arguments[0].click();", cb)
+        else:
+            self._set_password(row["password"])
 
         # First name
         f = driver.find_element(*LOC_FIRSTNAME)
