@@ -27,7 +27,7 @@ Re-testing of Project #2 test cases using Python + Selenium with a data-driven a
 | **Target system** | Moodle LMS — `https://ihatetesting.moodlecloud.com/` |
 | **Credentials** | `phuc.nguyen0310@hcmut.edu.vn` / `Huuphuc0310@` |
 | **Framework** | Python 3.9 + Selenium 4 + unittest + pytest |
-| **Features covered** | TC-001 Admin Adds a New User (43 cases) · TC-006 Teacher Sets Up a Quiz (27 cases) |
+| **Features covered** | TC-001 (43) · TC-002 (27) · TC-003 (27) · TC-004 (17) · TC-005 (28) · TC-006 (27) |
 
 ---
 
@@ -59,20 +59,33 @@ pip3 install selenium webdriver-manager pandas openpyxl pytest
 ```
 swe-testing/
 ├── README.md
-├── TC-001.krecorder          # Original Katalon Recorder file (TC-001 source)
+├── TC-001.krecorder          # Katalon Recorder source — Admin Adds a New User
+├── TC-002.krecorder          # Katalon Recorder source — Admin Creates a Course
+├── TC-003.krecorder          # Katalon Recorder source — Teacher Creates an Assignment
+├── TC-004.krecorder          # Katalon Recorder source — Teacher Grades a Student Assignment
+├── TC-005.krecorder          # Katalon Recorder source — Admin Creates a Calendar Event
+├── TC-006.krecorder          # Katalon Recorder source — Teacher Creates a Quiz
 ├── Group_11.xlsx             # Original test case specification
 ├── Group_11.pdf
 │
 ├── level1/
-│   ├── test_data.csv              # Test data for TC-006 (27 rows)
-│   ├── test_quiz_level1.py        # TC-006  Level 1 test script
-│   ├── test_data_tc001.csv        # Test data for TC-001 (43 rows)
-│   ├── test_add_user_level1.py    # TC-001  Level 1 test script
-│   └── run_tc001.sh               # Helper: run individual TC-001 cases
+│   ├── test_data_tc001.csv        # TC-001 test data (43 rows)
+│   ├── test_add_user_level1.py    # TC-001 Level 1 test script
+│   ├── run_tc001.sh               # Helper: run individual TC-001 cases
+│   ├── test_data_tc002.csv        # TC-002 test data (27 rows)
+│   ├── test_course_level1.py      # TC-002 Level 1 test script
+│   ├── test_data_tc003.csv        # TC-003 test data (27 rows)
+│   ├── test_assign_level1.py      # TC-003 Level 1 test script
+│   ├── test_data_tc004.csv        # TC-004 test data (17 rows)
+│   ├── test_grade_level1.py       # TC-004 Level 1 test script
+│   ├── test_data_tc005.csv        # TC-005 test data (28 rows)
+│   ├── test_event_level1.py       # TC-005 Level 1 test script
+│   ├── test_data_tc006.csv        # TC-006 test data (27 rows)
+│   └── test_quiz_level1.py        # TC-006 Level 1 test script
 │
 ├── level2/
 │   ├── test_data_level2.csv       # TC-006 data + ALL locators in CSV (27 rows)
-│   └── test_quiz_level2.py        # TC-006  Level 2 test script
+│   └── test_quiz_level2.py        # TC-006 Level 2 test script
 │
 └── non_functional/
     └── test_non_functional.py     # Performance + Security tests
@@ -86,12 +99,16 @@ swe-testing/
 
 Varying input values are read from a CSV file. Element locators are constants inside the Python script.
 
+---
+
 #### TC-001 — Admin Adds a New User (43 test cases)
 
 | File | Purpose |
 |---|---|
-| `level1/test_data_tc001.csv` | 43 rows — username, password, firstname, lastname, email, expected_result |
+| `level1/test_data_tc001.csv` | 43 rows — `username, password, firstname, lastname, email, expected_result` |
 | `level1/test_add_user_level1.py` | Reads the CSV and generates one `unittest` test method per row |
+
+**URL:** `https://ihatetesting.moodlecloud.com/user/editadvanced.php?id=-1`
 
 **What is tested:**
 
@@ -109,34 +126,156 @@ Varying input values are read from a CSV file. Element locators are constants in
 | 021–024 | Invalid username formats (uppercase, space, special char, reserved name) |
 | 025–028 | Passwords missing required character class (no digit / no upper / no lower / no special) → **fail** |
 | 029–031 | Invalid email formats (no @, truncated, embedded space) → **fail** |
-| 032 | Normal valid re-run → **success** |
-| 033 | "Generate password" checkbox path → **success** |
+| 032–033 | Normal valid re-run + "Generate password" checkbox path → **success** |
 | 034 | Duplicate username → **fail** |
 | 035–043 | Additional password & email edge cases |
 
 **Special password handling:**  
-Moodle's password field has a `readonly` attribute. The script bypasses it with JavaScript (mirroring the original Katalon Recorder `runScript` step):
+Moodle's password field has a `readonly` attribute. The script bypasses it with JavaScript:
 ```python
 driver.execute_script("""
   var i = document.getElementById('id_newpassword');
   i.removeAttribute('readonly');
-  ...
+  i.value = arguments[0];
   i.dispatchEvent(new Event('input', {bubbles:true}));
 """, password_value)
 ```
-
 Use `__generate__` as the password value in the CSV to tick the "Generate password and notify user" checkbox instead.
 
 ---
 
-#### TC-006 — Teacher Sets Up a Quiz (27 test cases)
+#### TC-002 — Admin Creates a New Course (27 test cases)
 
 | File | Purpose |
 |---|---|
-| `level1/test_data.csv` | 27 rows — quiz_name, grade_to_pass, time_limit, close_date, expected_result |
+| `level1/test_data_tc002.csv` | 27 rows — `test_case_id, fullname, shortname, end_date_enabled, end_date_offset_days, end_date_offset_years, numsections, expected_result` |
+| `level1/test_course_level1.py` | Reads the CSV and generates one test per row |
+
+**URL:** `https://ihatetesting.moodlecloud.com/course/edit.php?category=1`
+
+**What is tested:**
+
+| TC range | Boundary / scenario |
+|---|---|
+| 001–004 | Course fullname boundaries (empty, 1 char, 2 chars, long) |
+| 005–008 | Course shortname boundaries |
+| 009–011 | End date: disabled / today / past / future |
+| 012–016 | Number of sections (0, 1, 52, 53+) |
+| 017–027 | Combinations of valid and invalid fields |
+
+**Success check:** `"Announcements"` present in page source after submit.
+
+---
+
+#### TC-003 — Teacher Creates an Assignment (27 test cases)
+
+| File | Purpose |
+|---|---|
+| `level1/test_data_tc003.csv` | 27 rows — `test_case_id, name, gradepass, duedate_enabled, duedate_offset_days, duedate_offset_years, cutoff_offset_days, cutoff_offset_years, submission_file, submission_onlinetext, expected_result` |
+| `level1/test_assign_level1.py` | Reads the CSV and generates one test per row |
+
+**URL:** `https://ihatetesting.moodlecloud.com/course/modedit.php?add=assign&type&course=141&sectionid=695&return=0&beforemod=0`
+
+**Role:** Logged in as admin, **switched to Teacher role** on course 141.
+
+**What is tested:**
+
+| TC range | Boundary / scenario |
+|---|---|
+| 001–004 | Assignment name boundaries (empty, 1 char, 2 chars, long) |
+| 005–010 | Grade to pass boundaries (0, 0.01, 9.99, 10, 10.01, negative) |
+| 011–016 | Due date: disabled / today / past / future |
+| 017–022 | Cut-off date relative to due date |
+| 023–027 | Submission type checkbox combinations (file / online text / both / neither) |
+
+**Submit button:** `id_submitbutton2` (fallback: `id_submitbutton`).  
+**Success check:** `"Announcements"` present in page source.
+
+---
+
+#### TC-004 — Teacher Grades a Student Assignment (17 test cases)
+
+| File | Purpose |
+|---|---|
+| `level1/test_data_tc004.csv` | 17 rows — `test_case_id, grade, expected_result` |
+| `level1/test_grade_level1.py` | Reads the CSV and generates one test per row |
+
+**URL:** `https://ihatetesting.moodlecloud.com/mod/assign/view.php?id=321&action=grader`
+
+**Role:** Logged in as admin, **switched to Teacher role**.
+
+**What is tested:**
+
+| TC range | Boundary / scenario |
+|---|---|
+| 001–004 | Grade boundaries (0, 0.01, 99.99, 100) → **success** |
+| 005–006 | Grade out of range (−1, 100.01) → **fail** |
+| 007–010 | Non-numeric grades (letters, symbols, empty) |
+| 011–017 | Decimal precision and edge values |
+
+**React-compatible grade setter:**
+```python
+driver.execute_script("""
+  var setter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype, 'value').set;
+  setter.call(el, arguments[0]);
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+""", grade_value)
+```
+**Success check:** JS-injected `#__test_marker[data-has-error="no"]` element.
+
+---
+
+#### TC-005 — Admin Creates a Calendar Event (28 test cases)
+
+| File | Purpose |
+|---|---|
+| `level1/test_data_tc005.csv` | 28 rows — `test_case_id, name, duration_type, minutes, until_offset_days, repeat, expected_result` |
+| `level1/test_event_level1.py` | Reads the CSV and generates one test per row |
+
+**URL:** `https://ihatetesting.moodlecloud.com/calendar/view.php?view=month`
+
+**What is tested:**
+
+| TC range | Boundary / scenario |
+|---|---|
+| 001–004 | Event name boundaries (empty, 1 char, 2 chars, long) |
+| 005–010 | Duration in minutes boundaries (0, 1, 2, 9999998, 9999999, 10000000) |
+| 011–015 | Duration "until date" offset (−1, 0, +1, +364, +365 days) |
+| 016–018 | Invalid minutes values (1.5 decimal, text, negative) |
+| 019–024 | `duration_type` combinations: `none` / `minutes` / `until` |
+| 022–024 | Repeat checkbox enabled |
+| 025–028 | Mixed name + minutes edge cases |
+
+**Duration types:** `none` (radio `0`) · `minutes` (radio `1`) · `until` (radio `2`).  
+**Modal submit:** `//div[@role='dialog']//button[@data-action='save']`.  
+**Success check:** modal closes and `"Calendar"` present in page source.
+
+---
+
+#### TC-006 — Teacher Creates a Quiz (27 test cases)
+
+| File | Purpose |
+|---|---|
+| `level1/test_data_tc006.csv` | 27 rows — `test_case_id, name, timeclose_enabled, close_offset_days, close_offset_years, timelimit_enabled, timelimit_number, gradepass, expected_result` |
 | `level1/test_quiz_level1.py` | Reads the CSV and generates one test per row |
 
-**What is tested:** grade boundaries (0–10), time limit boundaries, close date boundaries, and empty quiz name validation.
+**URL:** `https://ihatetesting.moodlecloud.com/course/modedit.php?add=quiz&type&course=152&sectionid=750&return=0&beforemod=0`
+
+**Role:** Logged in as admin, **switched to Teacher role** on course 152, editing mode on.
+
+**What is tested:**
+
+| TC range | Boundary / scenario |
+|---|---|
+| 001–004 | Grade to pass boundaries (5, 9.99, 10 → success; 10.01 → fail) |
+| 005–010 | Time limit boundaries (−1 → fail; 0, 1, 998, 999, 1000 → success) |
+| 011–016 | Close date boundaries (−1 day → fail; today, +1 day, +10/11/12 years → success) |
+| 017, 027 | Empty quiz name → **fail** |
+| 018–024 | Combinations of timelimit/timeclose enabled or disabled |
+| 025–026 | Close date yesterday + gradepass 10.01 repeated variants → **fail** |
+
+**Success check:** `"Announcements"` present in page source.
 
 ---
 
@@ -155,7 +294,7 @@ Everything — site URL, credentials, locator types, locator values, and test da
 
 ### Non-Functional Tests
 
-| File | `level non_functional/test_non_functional.py` |
+| File | `non_functional/test_non_functional.py` |
 |---|---|
 | **Performance tests** | Page load time ≤ 5 s · Quiz form load ≤ 8 s · Save response ≤ 6 s |
 | **Security tests** | Password field masked · XSS payload rejected · HTTPS enforced · No credentials in URL |
@@ -166,16 +305,33 @@ Everything — site URL, credentials, locator types, locator values, and test da
 
 All commands should be run from **inside the relevant folder**.
 
-### Run all TC-001 Level 1 tests
+### Run individual Level 1 test suites
 ```bash
 cd level1
+
+# TC-001 — Admin Adds a New User (43 cases)
 python3 -m pytest test_add_user_level1.py -v
+
+# TC-002 — Admin Creates a New Course (27 cases)
+python3 -m pytest test_course_level1.py -v
+
+# TC-003 — Teacher Creates an Assignment (27 cases)
+python3 -m pytest test_assign_level1.py -v
+
+# TC-004 — Teacher Grades a Student Assignment (17 cases)
+python3 -m pytest test_grade_level1.py -v
+
+# TC-005 — Admin Creates a Calendar Event (28 cases)
+python3 -m pytest test_event_level1.py -v
+
+# TC-006 — Teacher Creates a Quiz (27 cases)
+python3 -m pytest test_quiz_level1.py -v
 ```
 
-### Run all TC-006 Level 1 tests
+### Run all Level 1 tests at once
 ```bash
 cd level1
-python3 -m pytest test_quiz_level1.py -v
+python3 -m pytest . -v
 ```
 
 ### Run all TC-006 Level 2 tests

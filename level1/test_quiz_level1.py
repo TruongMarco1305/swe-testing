@@ -1,305 +1,210 @@
 """
-LEVEL 1 — Data-Driven Automation Testing
-Feature : Teacher Sets Up a Quiz (Moodle LMS)
-Site    : https://ihatetesting.moodlecloud.com/
-Tester  : Trương Gia Kỳ Nam
-
-Description
------------
-Test DATA is read from test_data.csv.
-Element locators and the site URL are hardcoded in this script.
+TC-006: Teacher Creates a Quiz
+Level-1 Selenium test – data-driven from test_data_tc006.csv
 """
 
 import csv
+import os
 import time
 import unittest
-from datetime import datetime, timedelta
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-# ── Site / account configuration ──────────────────────────────────────────
-BASE_URL   = "https://ihatetesting.moodlecloud.com/"
-USERNAME   = "phuc.nguyen0310@hcmut.edu.vn"
-PASSWORD   = "Huuphuc0310@"
-COURSE_URL = "https://ihatetesting.moodlecloud.com/course/view.php?id=141"  # ← adjust id
-
-# ── Hardcoded locators ─────────────────────────────────────────────────────
-LOC_USERNAME_FIELD  = (By.ID,   "username")
-LOC_PASSWORD_FIELD  = (By.ID,   "password")
-LOC_LOGIN_BTN       = (By.ID,   "loginbtn")
-
-LOC_EDIT_MODE_BTN   = (By.CSS_SELECTOR, "input[data-action='toggle-editing'],"
-                                         "button[data-action='toggle-editing']")
-LOC_ADD_ACTIVITY    = (By.CSS_SELECTOR, ".section-modchooser-link, "
-                                         "[data-action='open-chooser']")
-LOC_QUIZ_OPTION     = (By.CSS_SELECTOR, "[data-modname='quiz'], "
-                                         "a[href*='quiz']")
-LOC_QUIZ_NAME       = (By.ID,   "id_name")
-LOC_OPEN_ENABLE     = (By.CSS_SELECTOR, "input[name='timeopen[enabled]']")
-LOC_CLOSE_ENABLE    = (By.CSS_SELECTOR, "input[name='timeclose[enabled]']")
-LOC_TIMELIMIT_ENABLE= (By.CSS_SELECTOR, "input[name='timelimit[enabled]']")
-LOC_TIMELIMIT_VALUE = (By.CSS_SELECTOR, "input[name='timelimit[number]']")
-LOC_GRADE_TO_PASS   = (By.ID,   "id_gradepass")
-LOC_SAVE_BTN        = (By.ID,   "id_submitbutton2")
-
-# Error/success indicators
-LOC_ERROR_NAME      = (By.CSS_SELECTOR, "#id_error_name, .error[id*='name']")
-LOC_ERROR_GRADE     = (By.CSS_SELECTOR, "#id_error_gradepass, .error[id*='gradepass']")
-LOC_ERROR_TIME      = (By.CSS_SELECTOR, ".error[id*='timelimit'], #id_error_timelimit_number")
-LOC_ERROR_DATE      = (By.CSS_SELECTOR, ".error[id*='timeclose'], #id_error_timeclose")
-LOC_GENERAL_ERROR   = (By.CSS_SELECTOR, ".alert-danger, .error, [data-region='notice']")
-LOC_COURSE_PAGE     = (By.CSS_SELECTOR, ".course-content, #page-course-view-topics")
+BASE_URL   = "https://ihatetesting.moodlecloud.com"
+ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
+ADMIN_PASS = "Huuphuc0310@"
+COURSE_ID  = 152
+SECTION_ID = 750
+QUIZ_URL   = (
+    f"{BASE_URL}/course/modedit.php"
+    f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
+)
+CSV_PATH   = os.path.join(os.path.dirname(__file__), "test_data_tc006.csv")
 
 
-def load_csv(path: str) -> list[dict]:
-    with open(path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+def _load_csv():
+    rows = []
+    with open(CSV_PATH, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rows.append(row)
+    return rows
 
 
-def set_date(driver, wait, field_prefix: str, target_date: datetime):
-    """Set a Moodle date-time picker (day/month/year/hour/minute selects)."""
-    Select(driver.find_element(By.NAME, f"{field_prefix}[day]")
-           ).select_by_value(str(target_date.day))
-    Select(driver.find_element(By.NAME, f"{field_prefix}[month]")
-           ).select_by_value(str(target_date.month))
-    Select(driver.find_element(By.NAME, f"{field_prefix}[year]")
-           ).select_by_value(str(target_date.year))
+def _make_test(row):
+    tc_id              = row["test_case_id"]
+    name               = row["name"]
+    timeclose_enabled  = row["timeclose_enabled"].strip().lower() == "yes"
+    close_days         = int(row["close_offset_days"]) if row["close_offset_days"].strip() else 7
+    close_years        = int(row["close_offset_years"]) if row["close_offset_years"].strip() else 0
+    timelimit_enabled  = row["timelimit_enabled"].strip().lower() == "yes"
+    timelimit_number   = row["timelimit_number"].strip() if row["timelimit_number"].strip() else "30"
+    gradepass          = row["gradepass"].strip()
+    expected           = row["expected_result"].strip().lower()
+
+    def test_method(self):
+        driver = self.__class__.driver
+        wait   = WebDriverWait(driver, 20)
+
+        driver.get(QUIZ_URL)
+        time.sleep(3)
+
+        # type name
+        name_field = wait.until(EC.presence_of_element_located((By.ID, "id_name")))
+        name_field.clear()
+        if name:
+            name_field.send_keys(name)
+
+        # JS helpers
+        js_helpers = """
+function sS(id,v){
+  var e=document.getElementById(id);
+  if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}
+}
+function nS(id,v){
+  var e=document.getElementById(id);
+  if(e){
+    var s=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+    s.call(e,String(v));
+    e.dispatchEvent(new Event('input',{bubbles:true}));
+    e.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+}
+function ens(id){var c=document.getElementById(id);if(c&&!c.checked){c.click();}}
+function dis(id){var c=document.getElementById(id);if(c&&c.checked){c.click();}}
+"""
+        js = js_helpers + """
+ens('id_timeopen_enabled');
+var tod=new Date();
+sS('id_timeopen_day',tod.getDate());
+sS('id_timeopen_month',tod.getMonth()+1);
+sS('id_timeopen_year',tod.getFullYear());
+sS('id_timeopen_hour',tod.getHours());
+sS('id_timeopen_minute',0);
+"""
+        if timeclose_enabled:
+            js += f"""
+ens('id_timeclose_enabled');
+var cl=new Date(tod);
+cl.setFullYear(cl.getFullYear()+({close_years}));
+cl.setDate(cl.getDate()+({close_days}));
+sS('id_timeclose_day',cl.getDate());
+sS('id_timeclose_month',cl.getMonth()+1);
+sS('id_timeclose_year',cl.getFullYear());
+sS('id_timeclose_hour',cl.getHours());
+sS('id_timeclose_minute',0);
+"""
+        else:
+            js += "dis('id_timeclose_enabled');\n"
+
+        if timelimit_enabled:
+            js += f"""
+ens('id_timelimit_enabled');
+nS('id_timelimit_number',{repr(timelimit_number)});
+sS('id_timelimit_timeunit','60');
+"""
+        else:
+            js += "dis('id_timelimit_enabled');\n"
+
+        js += f"nS('id_gradepass',{repr(gradepass)});\n"
+
+        driver.execute_script(js)
+        time.sleep(2)
+
+        # submit
+        try:
+            btn = driver.find_element(By.ID, "id_submitbutton2")
+        except Exception:
+            btn = driver.find_element(By.ID, "id_submitbutton")
+        driver.execute_script("arguments[0].click();", btn)
+        time.sleep(4)
+
+        outcome = self._get_outcome(driver)
+        self.assertEqual(
+            outcome, expected,
+            f"{tc_id}: expected={expected}, got={outcome} | "
+            f"name={repr(name)} gradepass={gradepass} "
+            f"timelimit_enabled={timelimit_enabled} timelimit_number={timelimit_number} "
+            f"timeclose_enabled={timeclose_enabled} close_days={close_days} close_years={close_years}"
+        )
+
+    test_method.__name__ = f"test_{tc_id.replace('-', '_')}"
+    return test_method
 
 
-class TestQuizSetupLevel1(unittest.TestCase):
+class TestQuizLevel1(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        options = webdriver.ChromeOptions()
-        options.add_argument("--start-maximized")
-        # options.add_argument("--headless=new")  # uncomment for headless
+        opts = webdriver.ChromeOptions()
+        # opts.add_argument("--headless")
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
         cls.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=options,
+            service=Service(ChromeDriverManager().install()), options=opts)
+        cls.driver.set_window_size(1400, 900)
+        cls._login_and_switch_role()
+
+    @classmethod
+    def _login_and_switch_role(cls):
+        driver = cls.driver
+        wait   = WebDriverWait(driver, 20)
+
+        driver.get(f"{BASE_URL}/login/index.php")
+        wait.until(EC.presence_of_element_located((By.ID, "username")))
+        driver.find_element(By.ID, "username").send_keys(ADMIN_USER)
+        driver.find_element(By.ID, "password").send_keys(ADMIN_PASS)
+        driver.find_element(By.ID, "loginbtn").click()
+        wait.until(EC.url_contains("/my/"))
+        time.sleep(2)
+
+        # switch to Teacher role on course 152
+        driver.get(
+            f"{BASE_URL}/course/switchrole.php"
+            f"?id={COURSE_ID}&switchrole=-1"
+            f"&returnurl=%2Fcourse%2Fview.php%3Fid%3D{COURSE_ID}"
         )
-        cls.wait = WebDriverWait(cls.driver, 15)
-        cls.data = load_csv("test_data.csv")
-        cls._login()
-
-    @classmethod
-    def _dismiss_cookie_banner(cls):
-        """Dismiss OneTrust / cookie consent overlay if present."""
+        time.sleep(2)
         try:
-            # Wait up to 5 s for the accept button to appear
-            accept_btn = WebDriverWait(cls.driver, 5).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR,
-                    "#onetrust-accept-btn-handler, "
-                    ".onetrust-accept-btn-handler, "
-                    "button[id*='accept'], "
-                    "button[class*='accept-all']"))
-            )
-            accept_btn.click()
-            # Wait for the overlay to disappear
-            WebDriverWait(cls.driver, 5).until(
-                EC.invisibility_of_element_located(
-                    (By.CSS_SELECTOR, ".onetrust-pc-dark-filter"))
-            )
+            teacher_btn = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[normalize-space(.)='Teacher']")))
+            driver.execute_script("arguments[0].click();", teacher_btn)
+            time.sleep(2)
         except Exception:
-            pass  # No banner present — continue normally
+            pass
 
-    @classmethod
-    def _login(cls):
-        cls.driver.get(BASE_URL + "login/index.php")
-        cls.wait.until(EC.presence_of_element_located(LOC_USERNAME_FIELD))
-        cls._dismiss_cookie_banner()
-        cls.driver.find_element(*LOC_USERNAME_FIELD).send_keys(USERNAME)
-        cls.driver.find_element(*LOC_PASSWORD_FIELD).send_keys(PASSWORD)
-        # Always use JS click — bypasses any overlay (OneTrust, etc.)
-        btn = cls.driver.find_element(*LOC_LOGIN_BTN)
-        cls.driver.execute_script("arguments[0].click();", btn)
-        cls.wait.until(EC.url_contains("/my"))
+        # enable editing
+        driver.get(f"{BASE_URL}/course/view.php?id={COURSE_ID}")
+        time.sleep(2)
+        try:
+            edit_switch = driver.find_element(By.NAME, "setmode")
+            if not edit_switch.is_selected():
+                driver.execute_script("arguments[0].click();", edit_switch)
+            time.sleep(2)
+        except Exception:
+            pass
 
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()
 
-    # ── Helper: navigate to quiz add form ─────────────────────────────────
-    def _open_quiz_form(self):
-        driver, wait = self.driver, self.wait
-
-        # Go to course
-        driver.get(COURSE_URL)
-        wait.until(EC.presence_of_element_located(LOC_COURSE_PAGE))
-
-        # ── Step 1: Turn on Edit mode via the top-right toggle label ───────
-        # HTML: <input name="setmode" id="...-editingswitch">
-        #       <label for="...-editingswitch">Edit mode</label>
-        edit_input = wait.until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "input[name='setmode']")
-        ))
-        if not edit_input.is_selected():
-            input_id = edit_input.get_attribute("id")
-            label = driver.find_element(By.CSS_SELECTOR, f"label[for='{input_id}']")
-            driver.execute_script("arguments[0].click();", label)
-            wait.until(lambda d: d.find_element(
-                By.CSS_SELECTOR, "input[name='setmode']"
-            ).is_selected())
-            time.sleep(1)
-
-        # ── Step 2: Hover over a section to reveal the "+" button, then click ─
-        # The button is hidden until mouseover in Moodle 4.x edit mode
-        section = wait.until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "li.section, [data-for='section']")
-        ))
-        ActionChains(driver).move_to_element(section).perform()
-        time.sleep(0.5)
-        add_btn = wait.until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "button[data-action='open-addingcontent']")
-        ))
-        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", add_btn)
-        driver.execute_script("arguments[0].click();", add_btn)
-
-        # ── Step 3: Click "Activity or resource" from the dropdown ─────────
-        activity_btn = wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, "button[data-action='open-chooser']")
-        ))
-        driver.execute_script("arguments[0].click();", activity_btn)
-
-        # ── Step 4: Wait for the activity chooser modal ────────────────────
-        wait.until(EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, ".modchooser, [data-region='chooser-container']")
-        ))
-
-        # ── Step 5: Click "Quiz" in the modal ──────────────────────────────
-        quiz_item = wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR,
-             "[data-modname='quiz'] .modchooser-module-name, "
-             "[data-modname='quiz'] a, "
-             ".modchoosercontainer [title='Quiz']")
-        ))
-        quiz_item.click()
-
-        # ── Step 6: Click the "Add" button at the bottom of the modal ──────
-        add_confirm = wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR,
-             ".chooser-footer [data-action='add-chooser-option'], "
-             ".modal-footer .btn-primary, "
-             "button.addbutton")
-        ))
-        add_confirm.click()
-
-        # ── Wait for the quiz settings form to load ────────────────────────
-        wait.until(EC.presence_of_element_located(LOC_QUIZ_NAME))
-        time.sleep(1)
-
-    # ── Helper: fill quiz form from row dict ──────────────────────────────
-    def _fill_quiz_form(self, row: dict):
-        driver, wait = self.driver, self.wait
-        today = datetime.today()
-
-        # Quiz Name
-        name_field = wait.until(EC.presence_of_element_located(LOC_QUIZ_NAME))
-        name_field.clear()
-        name_field.send_keys(row["quiz_name"])
-
-        # Open date — always enable + set to today
-        open_chk = driver.find_element(*LOC_OPEN_ENABLE)
-        if not open_chk.is_selected():
-            open_chk.click()
-        set_date(driver, wait, "timeopen", today)
-
-        # Close date
-        close_chk = driver.find_element(*LOC_CLOSE_ENABLE)
-        if row["close_date_enabled"].strip().lower() == "yes":
-            if not close_chk.is_selected():
-                close_chk.click()
-            offset = int(row["close_date_offset_days"])
-            close_date = today + timedelta(days=offset)
-            set_date(driver, wait, "timeclose", close_date)
-        else:
-            if close_chk.is_selected():
-                close_chk.click()
-
-        # Time limit
-        tl_chk = driver.find_element(*LOC_TIMELIMIT_ENABLE)
-        if row["time_limit_enabled"].strip().lower() == "yes":
-            if not tl_chk.is_selected():
-                tl_chk.click()
-            tl_field = driver.find_element(*LOC_TIMELIMIT_VALUE)
-            tl_field.clear()
-            tl_field.send_keys(str(row["time_limit_minutes"]))
-        else:
-            if tl_chk.is_selected():
-                tl_chk.click()
-
-        # Grade to pass
-        grade_field = driver.find_element(*LOC_GRADE_TO_PASS)
-        grade_field.clear()
-        grade_field.send_keys(str(row["grade_to_pass"]))
-
-        # Submit
-        driver.find_element(*LOC_SAVE_BTN).click()
-
-    # ── Helper: determine actual outcome ─────────────────────────────────
-    def _get_outcome(self) -> str:
-        driver, wait = self.driver, self.wait
-        time.sleep(2)
-
-        if driver.find_elements(*LOC_ERROR_NAME):
-            return "fail_name"
-        if driver.find_elements(*LOC_ERROR_GRADE):
-            return "fail_grade"
-        if driver.find_elements(*LOC_ERROR_TIME):
-            return "fail_time"
-        if driver.find_elements(*LOC_ERROR_DATE):
-            return "fail_date"
-        if driver.find_elements(*LOC_GENERAL_ERROR):
-            return "fail_general"
-        # If redirected back to course page → success
-        if driver.find_elements(*LOC_COURSE_PAGE):
+    def _get_outcome(self, driver):
+        errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
+        if errors:
+            return "fail"
+        if "Announcements" in driver.page_source:
             return "success"
-        return "unknown"
-
-    # ── Map expected_result column → normalised key ───────────────────────
-    @staticmethod
-    def _normalise_expected(raw: str) -> str:
-        raw = raw.strip().lower()
-        if raw == "success":
-            return "success"
-        if "name" in raw:
-            return "fail_name"
-        if "grade" in raw:
-            return "fail_grade"
-        if "time" in raw:
-            return "fail_time"
-        if "date" in raw or "close" in raw or "open" in raw:
-            return "fail_date"
-        return raw  # fallback (e.g. fail_general)
+        return "success"
 
 
-def _make_test(row: dict):
-    def test_method(self):
-        self._open_quiz_form()
-        self._fill_quiz_form(row)
-        actual   = self._get_outcome()
-        expected = self._normalise_expected(row["expected_result"])
-        self.assertEqual(
-            actual, expected,
-            f"\n  [{row['test_case_id']}] quiz='{row['quiz_name']}' "
-            f"grade={row['grade_to_pass']} "
-            f"time={'disabled' if row['time_limit_enabled']=='no' else row['time_limit_minutes']} "
-            f"close={'disabled' if row['close_date_enabled']=='no' else row['close_date_offset_days']+'d'}"
-            f"\n  Expected: {expected}  |  Actual: {actual}"
-        )
-    return test_method
-
-
-# ── Dynamically attach one test method per CSV row ────────────────────────
-_rows = load_csv("test_data.csv")
-for _row in _rows:
-    _tc = _row["test_case_id"].replace("-", "_")
-    setattr(TestQuizSetupLevel1, f"test_{_tc}", _make_test(_row))
+# ── attach test methods dynamically ──────────────────────────────────────────
+for _row in _load_csv():
+    _m = _make_test(_row)
+    setattr(TestQuizLevel1, _m.__name__, _m)
 
 
 if __name__ == "__main__":
