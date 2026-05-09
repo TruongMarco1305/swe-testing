@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+<title>final TC-002</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-Preparation</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/login/index.php<datalist><option>https://ihatetesting.moodlecloud.com/login/index.php</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=username<datalist><option>id=username</option><option>name=username</option><option>xpath=//input[@id='username']</option><option>xpath=//form[@id='login']/div/input</option><option>xpath=//div/input</option><option>css=#username</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=username<datalist><option>id=username</option><option>name=username</option><option>xpath=//input[@id='username']</option><option>xpath=//div[@id='yui_3_18_1_1_1777016770351_12']/input</option><option>xpath=//div/input</option><option>css=#username</option></datalist></td><td>phuc.nguyen0310@hcmut.edu.vn</td></tr>
+<tr><td>type</td><td>id=password<datalist><option>id=password</option><option>name=password</option><option>xpath=//input[@id='password']</option><option>xpath=//form[@id='login']/div[2]/div/input</option><option>xpath=//div[2]/div/input</option><option>css=#password</option></datalist></td><td>Huuphuc0310@</td></tr>
+<tr><td>click</td><td>id=password<datalist><option>id=password</option><option>name=password</option><option>xpath=//input[@id='password']</option><option>xpath=//form[@id='login']/div[2]/div/input</option><option>xpath=//div[2]/div/input</option><option>css=#password</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=loginbtn<datalist><option>id=loginbtn</option><option>xpath=//button[@id='loginbtn']</option><option>xpath=//form[@id='login']/div[3]/button</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Password'])[1]/following::button[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Username or email'])[1]/following::button[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Lost password?'])[1]/preceding::button[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='አማርኛ ‎(am)‎'])[1]/preceding::button[1]</option><option>xpath=//*/text()[normalize-space(.)='Log in']/parent::*</option><option>xpath=//div[3]/button</option><option>css=#loginbtn</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/my/<datalist><option>https://ihatetesting.moodlecloud.com/my/</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Site administration<datalist><option>link=Site administration</option><option>xpath=//a[contains(text(),'Site administration')]</option><option>xpath=//ul[@id='moremenu-69eb1fd0f13bb-navbar-nav']/li[4]/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='My courses'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Dashboard'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Notifications'])[1]/preceding::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='You have no notifications'])[1]/preceding::a[4]</option><option>xpath=//*/text()[normalize-space(.)='Site administration']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/admin/search.php')]</option><option>xpath=//li[4]/a</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/admin/search.php<datalist><option>https://ihatetesting.moodlecloud.com/admin/search.php</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>xpath=//img[contains(@src,'https://secure.gravatar.com/avatar/729fe4d3dd67849f18615956b9f0a960?s=35&d=mm')]<datalist><option>xpath=//img[contains(@src,'https://secure.gravatar.com/avatar/729fe4d3dd67849f18615956b9f0a960?s=35&d=mm')]</option><option>xpath=//a[@id='user-menu-toggle']/span/span/span/img</option><option>xpath=//img</option><option>css=img.userpicture.defaultuserpic</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Switch role to...<datalist><option>link=Switch role to...</option><option>xpath=//a[contains(text(),'Switch role to...')]</option><option>xpath=//div[@id='carousel-item-main']/a[10]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Preferences'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Manage plans and billing'])[1]/following::a[3]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Log out'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Language selector'])[1]/preceding::a[2]</option><option>xpath=//*/text()[normalize-space(.)='Switch role to...']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/switchrole.php?id=1&switchrole=-1&returnurl=%2Fadmin%2Fsearch.php%3Fquery')]</option><option>xpath=//a[10]</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/switchrole.php?id=1&switchrole=-1&returnurl=%2Fadmin%2Fsearch.php%3Fquery<datalist><option>https://ihatetesting.moodlecloud.com/course/switchrole.php?id=1&switchrole=-1&returnurl=%2Fadmin%2Fsearch.php%3Fquery</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=single_button69eb1fdcab0108<datalist><option>id=single_button69eb1fdcab0108</option><option>xpath=//button[@id='single_button69eb1fdcab0108']</option><option>xpath=//div[@id='region-main']/div/div[2]/div/form/button</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='See details and alternatives'])[1]/following::button[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Switch role to...'])[2]/following::button[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course creator'])[1]/preceding::button[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Teacher'])[1]/preceding::button[2]</option><option>xpath=//*/text()[normalize-space(.)='Manager']/parent::*</option><option>xpath=//form/button</option><option>css=#single_button69eb1fdcab0108</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/admin/search.php?query<datalist><option>https://ihatetesting.moodlecloud.com/admin/search.php?query</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Courses<datalist><option>link=Courses</option><option>xpath=//a[contains(text(),'Courses')]</option><option>xpath=//ul[@id='moremenu-69eb1fe0abf79-nav-tabs']/li[3]/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Users'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='General'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Grades'])[2]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Plugins'])[1]/preceding::a[2]</option><option>xpath=//*/text()[normalize-space(.)='Courses']/parent::*</option><option>xpath=//a[contains(@href, '#linkcourses')]</option><option>xpath=//div[2]/nav/ul/li[3]/a</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Add a new course<datalist><option>link=Add a new course</option><option>xpath=//a[contains(text(),'Add a new course')]</option><option>xpath=//div[@id='linkcourses']/div/div/div[2]/ul/li[3]/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Add a category'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Manage courses and categories'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Restore course'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Download course content'])[1]/preceding::a[2]</option><option>xpath=//*/text()[normalize-space(.)='Add a new course']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/edit.php?category=0')]</option><option>xpath=//div[3]/div/div/div[2]/ul/li[3]/a</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-001</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn001_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn001_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-002</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn002_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-003</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>f</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn003_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-004</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn004_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-005</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn005_nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn005_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-006</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn006_nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn006_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-007</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn008_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-008</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn009_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>s</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-009</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn010_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-010</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn011_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn011_ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-011</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn012_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn012_ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-012</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn014_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn014_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(-1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(-1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-013</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn015_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn015_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-014</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn016_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn016_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-015</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn017_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn017_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(10));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(10));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-016</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn018_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn018_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(11));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(11));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-017</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn019_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn019_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(12));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(12));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(0));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-018</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn026_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn018_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-019</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn027_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn027_ssssssss</td></tr>
+<tr><td>runScript</td><td>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}<datalist><option>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-020</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn028_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn028_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-021</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn029_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn029_ssssssss</td></tr>
+<tr><td>runScript</td><td>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}<datalist><option>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-022</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn030_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn030_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-023</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn031_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn031_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-024</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn032_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn032_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-025</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn033_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn033_ssssssss</td></tr>
+<tr><td>runScript</td><td>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}<datalist><option>var cb=document.getElementById('id_enddate_enabled');if(cb&&cb.checked){cb.click();}</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyTextPresent</td><td>Announcements<datalist><option>Announcements</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-026</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn034_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn001_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(30));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-027</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/edit.php?category=0<datalist><option>https://ihatetesting.moodlecloud.com/course/edit.php?category=0</option></datalist></td><td></td></tr>
+<tr><td>pause</td><td>5000<datalist><option>5000</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_fullname<datalist><option>id=id_fullname</option></datalist></td><td>fn035_nnnnnnnnnnnnnnnnnnnn</td></tr>
+<tr><td>click</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_shortname<datalist><option>id=id_shortname</option></datalist></td><td>sn035_ssssssss</td></tr>
+<tr><td>runScript</td><td>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(-1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());<datalist><option>var end=new Date();end.setFullYear(end.getFullYear()+(0));end.setMonth(end.getMonth()+(0));end.setDate(end.getDate()+(-1));function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}sS('id_enddate_day',end.getDate());sS('id_enddate_month',end.getMonth()+1);sS('id_enddate_year',end.getFullYear());sS('id_enddate_hour',end.getHours());sS('id_enddate_minute',end.getMinutes());</option></datalist></td><td></td></tr>
+<tr><td>runScript</td><td>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}<datalist><option>var e=document.getElementById('id_numsections');if(e){e.value='10';e.dispatchEvent(new Event('change',{bubbles:true}));}</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_saveanddisplay<datalist><option>id=id_saveanddisplay</option></datalist></td><td></td></tr>
+<tr><td>verifyElementPresent</td><td>css=[id^="id_error_"]<datalist><option>css=[id^="id_error_"]</option></datalist></td><td></td></tr>
+</tbody></table>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3" data-tags="">TC-002-Cleanup</td></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/my/<datalist><option>https://ihatetesting.moodlecloud.com/my/</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Site administration<datalist><option>link=Site administration</option><option>xpath=//a[contains(text(),'Site administration')]</option><option>xpath=//ul[@id='moremenu-69ec85b349b08-navbar-nav']/li[4]/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='My courses'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Dashboard'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Notifications'])[1]/preceding::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='You have no notifications'])[1]/preceding::a[4]</option><option>xpath=//*/text()[normalize-space(.)='Site administration']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/admin/search.php')]</option><option>xpath=//li[4]/a</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/admin/search.php<datalist><option>https://ihatetesting.moodlecloud.com/admin/search.php</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Courses<datalist><option>link=Courses</option><option>xpath=//a[contains(text(),'Courses')]</option><option>xpath=//ul[@id='moremenu-69ec85c5cf5d7-nav-tabs']/li[3]/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Users'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='General'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Grades'])[2]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Plugins'])[1]/preceding::a[2]</option><option>xpath=//*/text()[normalize-space(.)='Courses']/parent::*</option><option>xpath=//a[contains(@href, '#linkcourses')]</option><option>xpath=//div[2]/nav/ul/li[3]/a</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Manage courses and categories<datalist><option>link=Manage courses and categories</option><option>xpath=//a[contains(text(),'Manage courses and categories')]</option><option>xpath=//div[@id='linkcourses']/div/div/div[2]/ul/li/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Courses'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='User agreements'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Add a category'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Add a new course'])[1]/preceding::a[2]</option><option>xpath=//*/text()[normalize-space(.)='Manage courses and categories']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/management.php')]</option><option>xpath=//div[3]/div/div/div[2]/ul/li/a</option><option>css=#linkcourses > div.container-fluid > div.row > div.col-sm-9 > ul.list-unstyled > li > a</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/management.php<datalist><option>https://ihatetesting.moodlecloud.com/course/management.php</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>xpath=//a[@id='action-menu-toggle-1']/i<datalist><option>xpath=//a[@id='action-menu-toggle-1']/i</option><option>xpath=//div[5]/div/a/i</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Delete<datalist><option>link=Delete</option><option>xpath=//div[@id='action-menu-1-menu']/a[4]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Create new subcategory'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Edit'])[1]/following::a[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Permissions'])[2]/preceding::a[1]</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/management.php?categoryid=8&sesskey=1VehPhVCbL&action=deletecategory')]</option><option>xpath=//div[5]/div/div/a[4]</option><option>css=a.dropdown-item.action-delete.menu-action</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=id_fulldelete<datalist><option>id=id_fulldelete</option><option>name=fulldelete</option><option>xpath=//select[@id='id_fulldelete']</option><option>xpath=//div[@id='fitem_id_fulldelete']/div[2]/select</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='What to do'])[1]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Courses'])[2]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Move into'])[1]/preceding::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Selected items:'])[1]/preceding::select[2]</option><option>xpath=//select</option><option>css=#id_fulldelete</option></datalist></td><td></td></tr>
+<tr><td>select</td><td>id=id_fulldelete<datalist><option>id=id_fulldelete</option><option>name=fulldelete</option><option>xpath=//select[@id='id_fulldelete']</option><option>xpath=//div[@id='yui_3_18_1_1_1777108442075_54']/select</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='What to do'])[1]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Courses'])[2]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Move into'])[1]/preceding::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Selected items:'])[1]/preceding::select[2]</option><option>xpath=//select</option><option>css=#id_fulldelete</option></datalist></td><td>label=Delete all - cannot be undone</td></tr>
+<tr><td>click</td><td>id=id_submitbutton<datalist><option>id=id_submitbutton</option><option>name=submitbutton</option><option>xpath=//input[@id='id_submitbutton']</option><option>xpath=//div[@id='fgroup_id_buttonar']/div[2]/div/div/div/span/input</option><option>xpath=//span/input</option><option>css=#id_submitbutton</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Site administration<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/admin/search.php<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Courses<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Manage courses and categories<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/management.php<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Create new category<datalist><option>link=Create new category</option><option>xpath=//a[contains(text(),'Create new category')]</option><option>xpath=//div[@id='category-listing']/div/div/div/a</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Course categories'])[2]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Skip to the course listings'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE bulk action selection'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[3]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Create new category']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7')]</option><option>xpath=//form/div[2]/div/div/div/div/a</option><option>css=a.btn.btn-secondary</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7<datalist><option>https://ihatetesting.moodlecloud.com/course/editcategory.php?parent=7</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>id=form_autocomplete_downarrow-1777108458488<datalist><option>id=form_autocomplete_downarrow-1777108458488</option><option>xpath=//span[@id='form_autocomplete_downarrow-1777108458488']</option><option>xpath=//div[@id='fitem_id_parent']/div[2]/div[4]/span</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Selected items:'])[1]/following::span[3]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Top'])[2]/preceding::span[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='DO NOT DELETE'])[4]/preceding::span[1]</option><option>xpath=//*/text()[normalize-space(.)='▼']/parent::*</option><option>xpath=//div[4]/span</option><option>css=#form_autocomplete_downarrow-1777108458488</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>xpath=//li[@id='']<datalist><option>xpath=//li[@id='']</option><option>xpath=//ul[@id='form_autocomplete_suggestions-1777108458488']/li[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='▼'])[1]/following::li[2]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Category name'])[1]/preceding::li[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Category ID number'])[1]/preceding::li[1]</option><option>xpath=//div[2]/ul/li[2]</option></datalist></td><td></td></tr>
+<tr><td>select</td><td>id=id_parent<datalist><option>id=id_parent</option><option>name=parent</option><option>xpath=//select[@id='id_parent']</option><option>xpath=//div[@id='yui_3_18_1_1_1777108458350_30']/select</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Parent category'])[1]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Add new category'])[1]/following::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Selected items:'])[1]/preceding::select[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Added Top'])[1]/preceding::select[1]</option><option>xpath=//select</option><option>css=#id_parent</option></datalist></td><td>label=Top</td></tr>
+<tr><td>click</td><td>id=id_name<datalist><option>id=id_name</option><option>name=name</option><option>xpath=//input[@id='id_name']</option><option>xpath=//div[@id='fitem_id_name']/div[2]/input</option><option>xpath=//div[2]/input</option><option>css=#id_name</option></datalist></td><td></td></tr>
+<tr><td>type</td><td>id=id_name<datalist><option>id=id_name</option><option>name=name</option><option>xpath=//input[@id='id_name']</option><option>xpath=//div[@id='yui_3_18_1_1_1777108458350_38']/input</option><option>xpath=//div[2]/input</option><option>css=#id_name</option></datalist></td><td>Category 1</td></tr>
+<tr><td>click</td><td>id=id_submitbutton<datalist><option>id=id_submitbutton</option><option>name=submitbutton</option><option>xpath=//input[@id='id_submitbutton']</option><option>xpath=//div[@id='fgroup_id_buttonar']/div[2]/div/div/div/span/input</option><option>xpath=//span/input</option><option>css=#id_submitbutton</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>xpath=//div[@id='action-menu-2-menubar']/div[3]/a/i<datalist><option>xpath=//div[@id='action-menu-2-menubar']/div[3]/a/i</option><option>xpath=//li[2]/div/div[2]/div/div/div[3]/a/i</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>xpath=//img[contains(@src,'https://secure.gravatar.com/avatar/729fe4d3dd67849f18615956b9f0a960?s=35&d=mm')]<datalist><option>xpath=//img[contains(@src,'https://secure.gravatar.com/avatar/729fe4d3dd67849f18615956b9f0a960?s=35&d=mm')]</option><option>xpath=//a[@id='user-menu-toggle']/span/span[2]/span/img</option><option>xpath=//img</option><option>css=img.userpicture.defaultuserpic</option></datalist></td><td></td></tr>
+<tr><td>click</td><td>link=Log out<datalist><option>link=Log out</option><option>xpath=//a[contains(text(),'Log out')]</option><option>xpath=//div[@id='carousel-item-main']/a[11]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Return to my normal role'])[1]/following::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Preferences'])[1]/following::a[3]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='Language selector'])[1]/preceding::a[1]</option><option>xpath=(.//*[normalize-space(text()) and normalize-space(.)='አማርኛ ‎(am)‎'])[1]/preceding::a[1]</option><option>xpath=//*/text()[normalize-space(.)='Log out']/parent::*</option><option>xpath=//a[contains(@href, 'https://ihatetesting.moodlecloud.com/login/logout.php?sesskey=1VehPhVCbL')]</option><option>xpath=//a[11]</option></datalist></td><td></td></tr>
+<tr><td>open</td><td>https://ihatetesting.moodlecloud.com/login/index.php<datalist><option>https://ihatetesting.moodlecloud.com/login/index.php</option></datalist></td><td></td></tr>
+</tbody></table>
+</body>
+</html>

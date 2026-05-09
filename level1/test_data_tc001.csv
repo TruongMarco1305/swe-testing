@@ -22,7 +22,7 @@ TC-001-020,usr024_uuuuuuuuuu,XuanSang12@,ffffffffff,llllllllllllllllllllllllllll
 TC-001-021,usr026_UsrNom,XuanSang12@,ffffffffff,llllllllll,usr026_nom@test.com,fail
 TC-001-022,"usr027_usr nom",XuanSang12@,ffffffffff,llllllllll,usr027_nom@test.com,fail
 TC-001-023,usr028_usr!nom,XuanSang12@,ffffffffff,llllllllll,usr028_nom@test.com,fail
-TC-001-024,admin,XuanSang12@,ffffffffff,llllllllll,usr029_nom@test.com,success
+TC-001-024,admin,XuanSang12@,ffffffffff,llllllllll,usr029_nom@test.com,fail
 TC-001-025,usr030_usr,Abcdefg!@,ffffffffff,llllllllll,usr030_nom@test.com,fail
 TC-001-026,usr031_usr,abcdefg1!@,ffffffffff,llllllllll,usr031_nom@test.com,fail
 TC-001-027,usr032_usr,ABCDEFG1!@,ffffffffff,llllllllll,usr032_nom@test.com,fail
