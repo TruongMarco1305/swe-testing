@@ -284,10 +284,14 @@ class TestAssignLevel2(_BaseLevel2):
         if row["name"].strip():
             name_fld.send_keys(row["name"].strip())
 
-        # Grade to pass
-        gp = driver.find_element(*loc(row, "gradepass"))
-        gp.clear()
-        gp.send_keys(str(row["gradepass"]))
+        # Grade to pass — set via JS (field may be inside a collapsed accordion)
+        gp_el = driver.find_element(*loc(row, "gradepass"))
+        driver.execute_script(
+            "arguments[0].value = arguments[1];"
+            "arguments[0].dispatchEvent(new Event('input',  {bubbles:true}));"
+            "arguments[0].dispatchEvent(new Event('change', {bubbles:true}));",
+            gp_el, str(row["gradepass"]).strip()
+        )
 
         # Dates
         today = date.today()
@@ -705,6 +709,21 @@ class TestCreateUserLevel2(_BaseLevel2):
     """TC-001 — fully data-driven user creation tests."""
 
     _CSV_FILE = "test_data_tc001_level2.csv"
+
+    @classmethod
+    def _login(cls, row: dict):
+        """Override: CSV 'username'/'password' hold new-user data, not admin creds.
+        The login page uses id=username / id=password (not id_username / id_password)."""
+        driver, wait = cls.driver, cls.wait
+        login_url = row["site_url"].rstrip("/") + "/" + row["login_url_suffix"].lstrip("/")
+        driver.get(login_url)
+        wait.until(EC.presence_of_element_located((By.ID, "username")))
+        cls._dismiss_cookie_banner()
+        driver.find_element(By.ID, "username").send_keys("phuc.nguyen0310@hcmut.edu.vn")
+        driver.find_element(By.ID, "password").send_keys("Huuphuc0310@")
+        driver.execute_script("document.getElementById('loginbtn').click();")
+        wait.until(EC.url_contains("/my/"))
+        time.sleep(1)
 
     def _fill_and_submit(self, row: dict):
         driver = self.driver
