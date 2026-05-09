@@ -296,8 +296,62 @@ Everything — site URL, credentials, locator types, locator values, and test da
 
 | File | `non_functional/test_non_functional.py` |
 |---|---|
-| **Performance tests** | Page load time ≤ 5 s · Quiz form load ≤ 8 s · Save response ≤ 6 s |
-| **Security tests** | Password field masked · XSS payload rejected · HTTPS enforced · No credentials in URL |
+| **Feature under test** | Teacher Sets Up a Quiz (same Moodle flow as TC-006) |
+| **Test classes** | `TestPerformance` · `TestSecurity` |
+
+---
+
+#### Performance Tests (`TestPerformance`)
+
+SLA thresholds are defined as constants at the top of the file and can be adjusted without touching test logic.
+
+| Constant | Default | What it guards |
+|---|---|---|
+| `LOGIN_PAGE_LOAD_THRESHOLD` | 5.0 s | Time from `driver.get(LOGIN_URL)` until `#loginbtn` is present on a fresh unauthenticated session |
+| `QUIZ_FORM_LOAD_THRESHOLD` | 8.0 s | Time from `driver.get(QUIZ_ADD_URL)` until `#id_name` is present |
+| `QUIZ_SAVE_THRESHOLD` | 6.0 s | Time from clicking **Save and return to course** until `.course-content` or `#page-header` is present |
+
+| Test | ID | What is measured |
+|---|---|---|
+| `test_01_login_page_load_time` | PERF-01 | Login page full load time — measured on a **fresh unauthenticated session**; logs in afterward for subsequent tests |
+| `test_02_quiz_form_load_time` | PERF-02 | Quiz creation form load time via direct URL (`modedit.php?add=quiz&...`) |
+| `test_03_quiz_save_response_time` | PERF-03 | Round-trip time after clicking Save (JS click on `id_submitbutton2`) |
+
+Each test prints a `[PERF]` line with the exact measured time and threshold for easy CI log inspection.
+
+---
+
+#### Security Tests (`TestSecurity`)
+
+| Test | ID | What is verified |
+|---|---|---|
+| `test_01_password_field_is_masked` | SEC-01 | `<input id="password">` has `type="password"` — value is never visible in the DOM |
+| `test_02_xss_payloads_in_quiz_name_not_executed` | SEC-02 | 5 XSS / SQL-injection payloads submitted as Quiz Name — no `alert()` is triggered; no `Traceback` or `Fatal error` appears in page source |
+| `test_03_https_used` | SEC-03 | Login page and course page are both served over `https://` |
+| `test_04_no_credentials_in_url` | SEC-04 | After login, `current_url` contains neither the username nor the password |
+
+**XSS payloads tested:**
+```
+<script>alert('xss')</script>
+' OR '1'='1
+" OR "1"="1
+<img src=x onerror=alert(1)>
+'; DROP TABLE mdl_quiz; --
+```
+
+---
+
+#### Helper functions (shared by both test classes)
+
+| Function | Purpose |
+|---|---|
+| `_make_driver()` | Creates a maximised Chrome instance via `webdriver-manager` |
+| `_dismiss_cookie_banner(driver)` | Tries to click `#onetrust-accept-btn-handler`; waits for the dark overlay to disappear |
+| `_login(driver, wait)` | Navigates to login page, dismisses banner, hides overlay via JS, fills credentials, JS-clicks `loginbtn`, waits for `url_contains("/my/")` |
+| `_open_quiz_add_form(driver, wait)` | Navigates directly to `modedit.php?add=quiz&course=152&sectionid=750` and waits for `#id_name` |
+| `_fill_minimal_quiz(driver, name)` | Fills quiz name via `send_keys`; sets open/close dates via JS `sS()`/`ens()` helpers (same pattern as TC-006) |
+
+**Session setup pattern** — neither `TestPerformance` nor `TestSecurity` pre-logs in during `setUpClass`. Instead, `test_01` in each class starts on a **fresh unauthenticated session** (so the login page is real), then logs in at the end of that test so `test_02`–`test_04` have an authenticated session to work with.
 
 ---
 
@@ -393,17 +447,22 @@ These issues were discovered during development and are already handled in all s
 
 | Issue | Root cause | Fix applied |
 |---|---|---|
-| Login button click fails | OneTrust cookie banner overlays the button | `execute_script("arguments[0].click()", btn)` — JS click bypasses overlay |
+| Login button click fails | OneTrust cookie banner overlays the button | Try `#onetrust-accept-btn-handler` click first; then hide overlay via JS; finally JS-click `loginbtn` |
 | Edit mode toggle not found | Moodle 4.x changed the input name from `setediting` → `setmode` | Use `input[name='setmode']`, then click its `<label>` via JS |
 | "Add activity" button invisible | Moodle 4.x hides it until hover | `ActionChains.move_to_element(section).perform()` before clicking |
 | Submit button intercepted | Sticky footer or banner sits on top of button when it is near the bottom | `scrollIntoView({block:'center'})` + JS click |
 | Password field `readonly` | Moodle sets `readonly` on `id_newpassword` to force its own generator | Remove attribute + set value + dispatch `input`/`change`/`blur` events via JS |
+| Calendar modal stays open (false fail) | `[id^="id_error_"]` spans exist in the DOM as hidden placeholders even when there's no error | Check `EC.invisibility_of_element_located("div[role='dialog']")` — if modal closes → success; if it stays → fail |
+| Chrome session dies mid-suite | Injecting non-string values (e.g. `"abc"`) via the React setter can crash the renderer | `setUp()` probes `driver.current_url` before each test and calls `_new_driver()` to recover; the outcome block also catches `InvalidSessionIdException` inline |
+| Non-functional test_01 times out on login page | `setUpClass` pre-logged in, so Moodle redirected away before `#loginbtn` rendered | Removed pre-login from `setUpClass`; `test_01` now runs on a fresh unauthenticated session and logs in at the end |
+| `_open_quiz_add_form` timed out navigating activity chooser | Moodle 4.x hover → modal → confirm chain is too fragile | Replaced entirely with direct `modedit.php?add=quiz&...` URL navigation |
 
 ---
 
 ## Team Notes
 
 - Tests share a **single browser session** per suite (`setUpClass` / `tearDownClass`) to avoid repeated logins and speed up execution.
+- The non-functional test classes are an exception — they intentionally **do not pre-login** in `setUpClass` so that `test_01` in each class can measure/inspect the login page on a genuine unauthenticated session.
 - Tests run **sequentially** in CSV order. If a test creates a user, later tests that try the same username will get a duplicate-user error — this is intentional for TC-001-034.
 - To add new test cases, append a row to the relevant CSV; the Python script picks it up automatically with no code changes needed.
 - The `level2` CSV uses `css selector` as the locator type string for CSS selectors. The `BY_MAP` in `test_quiz_level2.py` maps this to `By.CSS_SELECTOR`.
