@@ -156,9 +156,26 @@ class TestQuizLevel1(unittest.TestCase):
 
         driver.get(f"{BASE_URL}/login/index.php")
         wait.until(EC.presence_of_element_located((By.ID, "username")))
+
+        # dismiss OneTrust / cookie-consent overlay if present
+        try:
+            accept_btn = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))
+            )
+            accept_btn.click()
+            time.sleep(1)
+        except Exception:
+            pass
+        driver.execute_script("""
+            var el = document.querySelector('.onetrust-pc-dark-filter');
+            if (el) el.style.display = 'none';
+            var banner = document.getElementById('onetrust-banner-sdk');
+            if (banner) banner.style.display = 'none';
+        """)
+
         driver.find_element(By.ID, "username").send_keys(ADMIN_USER)
         driver.find_element(By.ID, "password").send_keys(ADMIN_PASS)
-        driver.find_element(By.ID, "loginbtn").click()
+        driver.execute_script("document.getElementById('loginbtn').click();")
         wait.until(EC.url_contains("/my/"))
         time.sleep(2)
 
