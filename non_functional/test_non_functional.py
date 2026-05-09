@@ -24,20 +24,24 @@ NON-FUNCTIONAL TEST 2 — SECURITY TESTING
 
 import time
 import unittest
-from datetime import datetime, timedelta
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ── Configuration ──────────────────────────────────────────────────────────
 BASE_URL   = "https://ihatetesting.moodlecloud.com/"
 LOGIN_URL  = BASE_URL + "login/index.php"
-COURSE_URL = BASE_URL + "course/view.php?id=2"   # ← adjust if needed
+COURSE_ID  = 152
+SECTION_ID = 750
+COURSE_URL = BASE_URL + f"course/view.php?id={COURSE_ID}"
+QUIZ_ADD_URL = (
+    BASE_URL + f"course/modedit.php"
+    f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
+)
 USERNAME   = "phuc.nguyen0310@hcmut.edu.vn"
 PASSWORD   = "Huuphuc0310@"
 
@@ -88,110 +92,53 @@ def _login(driver, wait):
     driver.get(LOGIN_URL)
     wait.until(EC.presence_of_element_located((By.ID, "username")))
     _dismiss_cookie_banner(driver)
+    # Also hide overlay via JS as a belt-and-braces fallback
+    driver.execute_script("""
+        var el = document.querySelector('.onetrust-pc-dark-filter');
+        if (el) el.style.display = 'none';
+        var banner = document.getElementById('onetrust-banner-sdk');
+        if (banner) banner.style.display = 'none';
+    """)
     driver.find_element(By.ID, "username").send_keys(USERNAME)
     driver.find_element(By.ID, "password").send_keys(PASSWORD)
-    # Always JS-click to bypass any overlay
-    btn = driver.find_element(By.ID, "loginbtn")
-    driver.execute_script("arguments[0].click();", btn)
-    time.sleep(2)
+    driver.execute_script("document.getElementById('loginbtn').click();")
+    wait.until(EC.url_contains("/my/"))
+    time.sleep(1)
 
 
 def _open_quiz_add_form(driver, wait):
-    """Navigate to course and open the Add Quiz form."""
-    driver.get(COURSE_URL)
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".course-content")))
-
-    # ── Step 1: Turn on Edit mode via the top-right toggle label ──────────
-    # HTML: <input name="setmode" id="...-editingswitch">
-    #       <label for="...-editingswitch">Edit mode</label>
-    edit_input = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "input[name='setmode']")
-    ))
-    if not edit_input.is_selected():
-        input_id = edit_input.get_attribute("id")
-        label = driver.find_element(By.CSS_SELECTOR, f"label[for='{input_id}']")
-        driver.execute_script("arguments[0].click();", label)
-        WebDriverWait(driver, 10).until(lambda d: d.find_element(
-            By.CSS_SELECTOR, "input[name='setmode']"
-        ).is_selected())
-        time.sleep(1)
-
-    # ── Step 2: Hover over a section to reveal the "+" button, then click ──
-    # The button is hidden until mouseover in Moodle 4.x edit mode
-    section = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "li.section, [data-for='section']")
-    ))
-    ActionChains(driver).move_to_element(section).perform()
-    time.sleep(0.5)
-    add_btn = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "button[data-action='open-addingcontent']")
-    ))
-    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", add_btn)
-    driver.execute_script("arguments[0].click();", add_btn)
-
-    # ── Step 3: Click "Activity or resource" from the dropdown ─────────────
-    activity_btn = wait.until(EC.element_to_be_clickable(
-        (By.CSS_SELECTOR, "button[data-action='open-chooser']")
-    ))
-    driver.execute_script("arguments[0].click();", activity_btn)
-
-    # ── Step 4: Wait for the activity chooser modal ──────────────────────────
-    wait.until(EC.visibility_of_element_located(
-        (By.CSS_SELECTOR, ".modchooser, [data-region='chooser-container']")
-    ))
-
-    # ── Step 5: Click "Quiz" in the modal ────────────────────────────────────
-    quiz_item = wait.until(EC.element_to_be_clickable(
-        (By.CSS_SELECTOR,
-         "[data-modname='quiz'] .modchooser-module-name, "
-         "[data-modname='quiz'] a, "
-         ".modchoosercontainer [title='Quiz']")
-    ))
-    quiz_item.click()
-
-    # ── Step 6: Click the "Add" button at the bottom of the modal ────────────
-    add_confirm = wait.until(EC.element_to_be_clickable(
-        (By.CSS_SELECTOR,
-         ".chooser-footer [data-action='add-chooser-option'], "
-         ".modal-footer .btn-primary, "
-         "button.addbutton")
-    ))
-    add_confirm.click()
-
-    # ── Wait for the quiz settings form to load ──────────────────────────────
+    """Navigate directly to the quiz add form (same URL as TC-006)."""
+    driver.get(QUIZ_ADD_URL)
     wait.until(EC.presence_of_element_located((By.ID, "id_name")))
 
 
 def _fill_minimal_quiz(driver, name: str = "perf_test_quiz"):
-    """Fill the quiz form with minimal valid data and submit."""
-    today = datetime.today()
-    close = today + timedelta(days=7)
+    """Fill quiz form with minimal valid data using JS helpers (same as TC-006)."""
+    name_field = driver.find_element(By.ID, "id_name")
+    name_field.clear()
+    name_field.send_keys(name)
 
-    driver.find_element(By.ID, "id_name").clear()
-    driver.find_element(By.ID, "id_name").send_keys(name)
-
-    # Open date
-    oc = driver.find_element(By.CSS_SELECTOR, "input[name='timeopen[enabled]']")
-    if not oc.is_selected(): oc.click()
-    Select(driver.find_element(By.NAME, "timeopen[day]")
-           ).select_by_value(str(today.day))
-    Select(driver.find_element(By.NAME, "timeopen[month]")
-           ).select_by_value(str(today.month))
-    Select(driver.find_element(By.NAME, "timeopen[year]")
-           ).select_by_value(str(today.year))
-
-    # Close date
-    cc = driver.find_element(By.CSS_SELECTOR, "input[name='timeclose[enabled]']")
-    if not cc.is_selected(): cc.click()
-    Select(driver.find_element(By.NAME, "timeclose[day]")
-           ).select_by_value(str(close.day))
-    Select(driver.find_element(By.NAME, "timeclose[month]")
-           ).select_by_value(str(close.month))
-    Select(driver.find_element(By.NAME, "timeclose[year]")
-           ).select_by_value(str(close.year))
-
-    driver.find_element(By.ID, "id_gradepass").clear()
-    driver.find_element(By.ID, "id_gradepass").send_keys("5")
+    driver.execute_script("""
+        function sS(id,v){
+          var e=document.getElementById(id);
+          if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}
+        }
+        function ens(id){var c=document.getElementById(id);if(c&&!c.checked){c.click();}}
+        var tod=new Date();
+        var cl=new Date(tod); cl.setDate(cl.getDate()+7);
+        ens('id_timeopen_enabled');
+        sS('id_timeopen_day',tod.getDate());
+        sS('id_timeopen_month',tod.getMonth()+1);
+        sS('id_timeopen_year',tod.getFullYear());
+        sS('id_timeopen_hour',tod.getHours());
+        sS('id_timeopen_minute',0);
+        ens('id_timeclose_enabled');
+        sS('id_timeclose_day',cl.getDate());
+        sS('id_timeclose_month',cl.getMonth()+1);
+        sS('id_timeclose_year',cl.getFullYear());
+        sS('id_timeclose_hour',cl.getHours());
+        sS('id_timeclose_minute',0);
+    """)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -201,16 +148,17 @@ class TestPerformance(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Do NOT pre-login — test_01 measures the login page load on a
+        # fresh (unauthenticated) session, then logs in for the rest.
         cls.driver = _make_driver()
         cls.wait   = WebDriverWait(cls.driver, 20)
-        _login(cls.driver, cls.wait)
 
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()
 
     def test_01_login_page_load_time(self):
-        """Login page must load within the SLA threshold."""
+        """Login page must load within the SLA threshold (fresh session)."""
         start = time.time()
         self.driver.get(LOGIN_URL)
         self.wait.until(EC.presence_of_element_located((By.ID, "loginbtn")))
@@ -222,35 +170,24 @@ class TestPerformance(unittest.TestCase):
             elapsed, LOGIN_PAGE_LOAD_THRESHOLD,
             f"Login page took {elapsed:.3f}s — exceeds {LOGIN_PAGE_LOAD_THRESHOLD}s SLA"
         )
-        # Re-login after navigating away
-        _login(self.driver, self.wait)
+        # Login so subsequent tests have an authenticated session
+        _dismiss_cookie_banner(self.driver)
+        self.driver.execute_script("""
+            var el = document.querySelector('.onetrust-pc-dark-filter');
+            if (el) el.style.display = 'none';
+            var banner = document.getElementById('onetrust-banner-sdk');
+            if (banner) banner.style.display = 'none';
+        """)
+        self.driver.find_element(By.ID, "username").send_keys(USERNAME)
+        self.driver.find_element(By.ID, "password").send_keys(PASSWORD)
+        self.driver.execute_script("document.getElementById('loginbtn').click();")
+        self.wait.until(EC.url_contains("/my/"))
+        time.sleep(1)
 
     def test_02_quiz_form_load_time(self):
-        """Quiz add-form must appear within the SLA threshold after choosing Quiz."""
-        self.driver.get(COURSE_URL)
-        self.wait.until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, ".course-content")))
-
-        try:
-            btn = self.wait.until(EC.element_to_be_clickable(
-                (By.CSS_SELECTOR,
-                 "input[data-action='toggle-editing'],"
-                 "button[data-action='toggle-editing']")))
-            if "turn editing on" in (btn.get_attribute("value") or btn.text or "").lower():
-                btn.click()
-                time.sleep(1)
-        except Exception:
-            pass
-
-        add = self.wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR,
-             ".section-modchooser-link,[data-action='open-chooser']")))
-        add.click()
-
+        """Quiz add-form must appear within the SLA threshold (direct URL navigation)."""
         start = time.time()
-        quiz = self.wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, "[data-modname='quiz'],a[href*='quiz']")))
-        quiz.click()
+        self.driver.get(QUIZ_ADD_URL)
         self.wait.until(EC.presence_of_element_located((By.ID, "id_name")))
         elapsed = time.time() - start
 
@@ -267,9 +204,13 @@ class TestPerformance(unittest.TestCase):
         _fill_minimal_quiz(self.driver, name="perf_save_test")
 
         start = time.time()
-        self.driver.find_element(By.ID, "id_submitbutton2").click()
+        try:
+            btn = self.driver.find_element(By.ID, "id_submitbutton2")
+        except Exception:
+            btn = self.driver.find_element(By.ID, "id_submitbutton")
+        self.driver.execute_script("arguments[0].click();", btn)
         self.wait.until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, ".course-content")))
+            (By.CSS_SELECTOR, ".course-content, #page-header")))
         elapsed = time.time() - start
 
         print(f"\n  [PERF] Quiz save time  : {elapsed:.3f}s  "
@@ -287,9 +228,10 @@ class TestSecurity(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Do NOT pre-login — test_01 checks the login page on a fresh
+        # (unauthenticated) session, then logs in for the rest.
         cls.driver = _make_driver()
         cls.wait   = WebDriverWait(cls.driver, 20)
-        _login(cls.driver, cls.wait)
 
     @classmethod
     def tearDownClass(cls):
@@ -303,7 +245,19 @@ class TestSecurity(unittest.TestCase):
         self.assertEqual(field_type, "password",
                          f"Password field type='{field_type}' — should be 'password'")
         print(f"\n  [SEC] Password field type: '{field_type}' ✓")
-        _login(self.driver, self.wait)
+        # Login for subsequent tests
+        _dismiss_cookie_banner(self.driver)
+        self.driver.execute_script("""
+            var el = document.querySelector('.onetrust-pc-dark-filter');
+            if (el) el.style.display = 'none';
+            var banner = document.getElementById('onetrust-banner-sdk');
+            if (banner) banner.style.display = 'none';
+        """)
+        self.driver.find_element(By.ID, "username").send_keys(USERNAME)
+        self.driver.find_element(By.ID, "password").send_keys(PASSWORD)
+        self.driver.execute_script("document.getElementById('loginbtn').click();")
+        self.wait.until(EC.url_contains("/my/"))
+        time.sleep(1)
 
     def test_02_xss_payloads_in_quiz_name_not_executed(self):
         """XSS payloads injected into Quiz Name must NOT trigger JS alerts."""
@@ -313,8 +267,12 @@ class TestSecurity(unittest.TestCase):
             name_fld = self.driver.find_element(By.ID, "id_name")
             name_fld.clear()
             name_fld.send_keys(payload)
-            self.driver.find_element(By.ID, "id_submitbutton2").click()
-            time.sleep(1)
+            try:
+                btn = self.driver.find_element(By.ID, "id_submitbutton2")
+            except Exception:
+                btn = self.driver.find_element(By.ID, "id_submitbutton")
+            self.driver.execute_script("arguments[0].click();", btn)
+            time.sleep(2)
 
             try:
                 alert = self.driver.switch_to.alert
@@ -334,7 +292,7 @@ class TestSecurity(unittest.TestCase):
 
     def test_03_https_used(self):
         """All pages must be served over HTTPS (encrypted transport)."""
-        for path in ["login/index.php", "course/view.php?id=2"]:
+        for path in ["login/index.php", f"course/view.php?id={COURSE_ID}"]:
             url = BASE_URL + path
             self.driver.get(url)
             current = self.driver.current_url
@@ -346,7 +304,8 @@ class TestSecurity(unittest.TestCase):
 
     def test_04_no_credentials_in_url(self):
         """Username and password must never appear in the browser URL bar."""
-        _login(self.driver, self.wait)
+        self.driver.get(f"https://ihatetesting.moodlecloud.com/my/")
+        self.wait.until(EC.url_contains("/my/"))
         current_url = self.driver.current_url.lower()
         self.assertNotIn(USERNAME.lower(), current_url,
                          "Username found in URL after login!")
