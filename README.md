@@ -17,6 +17,7 @@ Re-testing of Project #2 test cases using Python + Selenium with a data-driven a
 7. [Debugging a Single Test Case](#debugging-a-single-test-case)
 8. [Known Moodle UI Quirks](#known-moodle-ui-quirks)
 9. [Team Notes](#team-notes)
+10. [Changelog](#changelog)
 
 ---
 
@@ -84,8 +85,13 @@ swe-testing/
 │   └── test_quiz_level1.py        # TC-006 Level 1 test script
 │
 ├── level2/
-│   ├── test_data_level2.csv       # TC-006 data + ALL locators in CSV (27 rows)
-│   └── test_quiz_level2.py        # TC-006 Level 2 test script
+│   ├── test_level2.py             # Single Level 2 script — all 6 TCs, 169 test cases
+│   ├── test_data_tc001_level2.csv # TC-001 data + locators (43 rows)
+│   ├── test_data_tc002_level2.csv # TC-002 data + locators (27 rows)
+│   ├── test_data_tc003_level2.csv # TC-003 data + locators (27 rows)
+│   ├── test_data_tc004_level2.csv # TC-004 data + locators (17 rows)
+│   ├── test_data_tc005_level2.csv # TC-005 data + locators (28 rows)
+│   └── test_data_tc006_level2.csv # TC-006 data + locators (27 rows)
 │
 └── non_functional/
     └── test_non_functional.py     # Performance + Security tests
@@ -281,14 +287,157 @@ driver.execute_script("""
 
 ### Level 2 — Data AND locators from CSV
 
-Everything — site URL, credentials, locator types, locator values, and test data — is read from a single CSV. The Python script contains **no hardcoded selectors**.
+Everything — site URL, credentials, locator types, locator values, and test data — is read from CSV files. The Python script contains **no hardcoded selectors or URLs**.
 
-| File | Purpose |
+#### Architecture
+
+All Level 2 tests live in a single file: **`level2/test_level2.py`**.
+
+```
+test_level2.py
+├── load_csv(filename)          # reads a CSV from the same directory
+├── loc(row, prefix)            # resolves (By.X, "value") from two CSV columns
+├── _BaseLevel2                 # shared base class (login, session recovery, teardown)
+│   ├── setUpClass              # opens Chrome, logs in once for the whole suite
+│   ├── _start_driver           # creates a maximised ChromeDriver instance
+│   ├── _dismiss_cookie_banner  # accepts OneTrust banner
+│   ├── _login                  # navigates to login URL from CSV, fills credentials
+│   ├── _recover                # re-creates driver + re-logs in if session dies
+│   └── setUp                   # probes current_url before each test; calls _recover if dead
+│
+├── TestCreateUserLevel2        # TC-001 — Admin Adds a New User       (43 tests)
+├── TestCreateCourseLevel2      # TC-002 — Admin Creates a New Course   (27 tests)
+├── TestAssignLevel2            # TC-003 — Teacher Creates an Assignment (27 tests)
+├── TestGradeLevel2             # TC-004 — Teacher Grades an Assignment  (17 tests)
+├── TestCalendarEventLevel2     # TC-005 — Admin Creates a Calendar Event (28 tests)
+└── TestQuizSetupLevel2         # TC-006 — Teacher Creates a Quiz        (27 tests)
+                                                              Total: 169 tests
+```
+
+#### Locator resolution
+
+Each CSV contains a pair of columns per interactive element:
+- `<prefix>_locator_type` — one of `id`, `name`, `css`, `xpath`, `link text`, `partial link text`, `tag name`, `class name`
+- `<prefix>_locator_value` — the selector string
+
+The `loc()` helper maps the type string to a `selenium.webdriver.common.by.By` constant at runtime:
+```python
+BY_MAP = {
+    "id": By.ID, "name": By.NAME, "css": By.CSS_SELECTOR,
+    "xpath": By.XPATH, "link text": By.LINK_TEXT,
+    "partial link text": By.PARTIAL_LINK_TEXT,
+    "tag name": By.TAG_NAME, "class name": By.CLASS_NAME,
+}
+
+def loc(row, prefix):
+    return BY_MAP[row[f"{prefix}_locator_type"].strip().lower()], \
+           row[f"{prefix}_locator_value"].strip()
+```
+
+#### Test factory pattern
+
+Each TC class generates one `unittest` test method per CSV row at import time using `setattr`:
+```python
+def _make_user_test(row):
+    def test_method(self):
+        self._fill_and_submit(row)
+        self.assertEqual(self._get_outcome(), row["expected_result"].strip(), ...)
+    test_method.__name__ = f"test_{row['test_case_id'].replace('-','_')}"
+    return test_method
+
+for _r in load_csv("test_data_tc001_level2.csv"):
+    setattr(TestCreateUserLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_user_test(_r))
+```
+This means pytest collects them as normal test methods — no plugin or fixture magic needed.
+
+---
+
+#### TC-001 Level 2 — Admin Adds a New User (43 test cases)
+
+| File | Columns |
 |---|---|
-| `level2/test_data_level2.csv` | 27 rows × 30 columns (TC-006 data + all locators) |
-| `level2/test_quiz_level2.py` | Resolves locator types at runtime via a `BY_MAP` dictionary |
+| `test_data_tc001_level2.csv` | `test_case_id, site_url, login_url_suffix, new_user_url, username, password, firstname, lastname, email, expected_result` + locator pairs for `username`, `firstname`, `lastname`, `email`, `save_btn` |
 
-**CSV columns include:** `site_url`, `login_url_suffix`, `username_locator_type`, `username_locator_value`, `password_locator_type` … and so on for every element touched in the test flow.
+**Special:** `password = __generate__` → ticks the "Generate password" checkbox instead of injecting a value.  
+**Success check:** `"Changes saved"` in page source.
+
+---
+
+#### TC-002 Level 2 — Admin Creates a New Course (27 test cases)
+
+| File | Columns |
+|---|---|
+| `test_data_tc002_level2.csv` | `test_case_id, site_url, login_url_suffix, new_course_url, username, password, fullname, shortname, end_date_enabled, end_date_offset_days, end_date_offset_years, numsections, expected_result` + locator pairs for `fullname`, `shortname`, `save_btn` |
+
+**End date:** computed as `today + offset_years + offset_days`; set via JS `sS()` on the day/month/year `<select>` elements. When `end_date_enabled = no`, the checkbox `id_enddate_enabled` is unchecked.  
+**Success check:** `"Announcements"` in page source.
+
+---
+
+#### TC-003 Level 2 — Teacher Creates an Assignment (27 test cases)
+
+| File | Columns |
+|---|---|
+| `test_data_tc003_level2.csv` | `test_case_id, site_url, login_url_suffix, assign_url, username, password, name, gradepass, duedate_enabled, duedate_offset_days, duedate_offset_years, cutoff_offset_days, cutoff_offset_years, submission_file, submission_onlinetext, expected_result` + locator pairs for `name`, `gradepass`, `save_btn` |
+
+**Role switch:** `TestAssignLevel2.setUpClass` navigates to `/course/switchrole.php?id=1&switchrole=-1` and clicks "Teacher" before any tests run.  
+**Dates:** all set via JS `ens()`/`dis()`/`sS()` helpers injected in one `execute_script` call.  
+**Submission types:** only changed when column is not `"default"`.  
+**Success check:** `"Announcements"` in page source or `.activity-header` CSS selector found.
+
+---
+
+#### TC-004 Level 2 — Teacher Grades a Student Assignment (17 test cases)
+
+| File | Columns |
+|---|---|
+| `test_data_tc004_level2.csv` | `test_case_id, site_url, login_url_suffix, grade_url, username, password, grade, expected_result` + locator pairs for `grade_input`, `save_btn` |
+
+**Grade injection:** React-compatible setter via JS `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set` + `input`/`change` events.  
+**Success check:** JS injects a sentinel element `#__test_marker`; `data-has-error="no"` → success, `"yes"` → fail.
+
+---
+
+#### TC-005 Level 2 — Admin Creates a Calendar Event (28 test cases)
+
+| File | Columns |
+|---|---|
+| `test_data_tc005_level2.csv` | `test_case_id, site_url, login_url_suffix, calendar_url, username, password, event_name, duration_type, minutes, until_offset_days, repeat, expected_result` + locator pairs for `event_name`, `save_btn` |
+
+**Duration types:** `none` (radio `0`) · `minutes` (radio `1`, sets minutes field) · `until` (radio `2`, sets date selects via JS offset from today).  
+**Modal submit:** XPath `//div[@role='dialog']//button[@data-action='save']`.  
+**Success check:** modal closes + `"Calendar"` in page source.
+
+---
+
+#### TC-006 Level 2 — Teacher Creates a Quiz (27 test cases)
+
+| File | Columns |
+|---|---|
+| `test_data_tc006_level2.csv` | `test_case_id, site_url, login_url_suffix, quiz_url, username, password, quiz_name, timeclose_enabled, close_offset_days, close_offset_years, timelimit_enabled, timelimit_number, gradepass, expected_result` + locator pairs for all interactive elements |
+
+**Role switch:** switches to Teacher role on course 152 before tests begin.  
+**Success check:** `"Announcements"` in page source.
+
+---
+
+#### Running Level 2 tests
+
+```bash
+cd level2
+
+# Collect all 169 tests (dry run)
+python3 -m pytest test_level2.py --collect-only -q
+
+# Run all Level 2 tests
+python3 -m pytest test_level2.py -v
+
+# Run a single TC class
+python3 -m pytest test_level2.py -v -k "TestCreateUserLevel2"
+
+# Run a single test case by ID
+python3 -m pytest test_level2.py -v -k "TC_001_024"
+```
 
 ---
 
@@ -388,10 +537,24 @@ cd level1
 python3 -m pytest . -v
 ```
 
+### Run all Level 2 tests (169 cases across 6 TCs)
+```bash
+cd level2
+python3 -m pytest test_level2.py -v
+
+# Run a single TC class
+python3 -m pytest test_level2.py -v -k "TestCreateUserLevel2"
+python3 -m pytest test_level2.py -v -k "TestCreateCourseLevel2"
+python3 -m pytest test_level2.py -v -k "TestAssignLevel2"
+python3 -m pytest test_level2.py -v -k "TestGradeLevel2"
+python3 -m pytest test_level2.py -v -k "TestCalendarEventLevel2"
+python3 -m pytest test_level2.py -v -k "TestQuizSetupLevel2"
+```
+
 ### Run all TC-006 Level 2 tests
 ```bash
 cd level2
-python3 -m pytest test_quiz_level2.py -v
+python3 -m pytest test_level2.py -v -k "TestQuizSetupLevel2"
 ```
 
 ### Run non-functional tests
@@ -404,6 +567,39 @@ python3 -m pytest test_non_functional.py -v
 ```bash
 python3 -m pytest level1/ level2/ non_functional/ -v
 ```
+
+---
+
+## Changelog
+
+### Level 2 — Complete Rewrite (May 2026)
+
+**Before:** Level 2 contained a single file (`test_quiz_level2.py`) covering only TC-006 with a single CSV (`test_data_level2.csv`).
+
+**After:** Level 2 was fully rebuilt into a unified architecture covering all 6 test cases:
+
+| What changed | Detail |
+|---|---|
+| Single script | `test_quiz_level2.py` → `test_level2.py` (all TCs in one file) |
+| Base class | `_BaseLevel2` shared base handles login, session recovery, cookie banner, and teardown for every TC subclass |
+| New TCs added | TC-001, TC-002, TC-003, TC-004, TC-005 each got a Level 2 class and CSV |
+| Test count | 27 → **169** collected tests |
+| Locator pattern | Unified `loc(row, prefix)` helper reads `<prefix>_locator_type` + `<prefix>_locator_value` from CSV |
+| Factory pattern | Each TC uses a `_make_XYZ_test(row)` closure + `setattr` loop — no pytest fixtures or plugins needed |
+| Session recovery | `setUp()` probes `driver.current_url` before each test; calls `_recover()` on dead sessions |
+
+**Files added:**
+- `level2/test_level2.py`
+- `level2/test_data_tc001_level2.csv` (43 rows)
+- `level2/test_data_tc002_level2.csv` (27 rows)
+- `level2/test_data_tc003_level2.csv` (27 rows)
+- `level2/test_data_tc004_level2.csv` (17 rows)
+- `level2/test_data_tc005_level2.csv` (28 rows)
+- `level2/test_data_tc006_level2.csv` (27 rows, renamed from `test_data_level2.csv`)
+
+**TC-003 special note:** `TestAssignLevel2.setUpClass` overrides the base to also switch the admin session to Teacher role on course 141 before any assignment tests run.
+
+**TC-001 special note:** Password column supports `__generate__` as a sentinel value — the script ticks the "Generate password and notify user" checkbox instead of injecting a password string.
 
 ---
 
@@ -465,5 +661,6 @@ These issues were discovered during development and are already handled in all s
 - The non-functional test classes are an exception — they intentionally **do not pre-login** in `setUpClass` so that `test_01` in each class can measure/inspect the login page on a genuine unauthenticated session.
 - Tests run **sequentially** in CSV order. If a test creates a user, later tests that try the same username will get a duplicate-user error — this is intentional for TC-001-034.
 - To add new test cases, append a row to the relevant CSV; the Python script picks it up automatically with no code changes needed.
-- The `level2` CSV uses `css selector` as the locator type string for CSS selectors. The `BY_MAP` in `test_quiz_level2.py` maps this to `By.CSS_SELECTOR`.
+- Level 2 CSVs use `id`, `css`, `xpath`, etc. as the locator type string. The `loc()` helper in `test_level2.py` maps these to the correct `By.*` constant via the `BY_MAP` dictionary.
 - Non-functional tests **do not** clean up quiz entries they create; run them in a test environment, not production.
+- `TestAssignLevel2` overrides `setUpClass` to switch role to Teacher after logging in; all other Level 2 classes log in as admin and stay in that role.
