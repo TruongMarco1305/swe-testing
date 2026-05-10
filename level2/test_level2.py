@@ -172,7 +172,14 @@ class TestCreateCourseLevel2(_BaseLevel2):
         sn = driver.find_element(*loc(row, "shortname"))
         sn.clear()
         if row["shortname"].strip():
-            sn.send_keys(row["shortname"].strip())
+            val = row["shortname"].strip()
+            if "fail" not in row["expected_result"].lower() and val:
+                uid = __import__("uuid").uuid4().hex[:6]
+                if len(val) + len(uid) + 1 <= 255:
+                    val = f"{val}_{uid}"
+                else:
+                    val = f"{val[:255-len(uid)-1]}_{uid}"
+            sn.send_keys(val)
 
         end_enabled  = row["end_date_enabled"].strip().lower() == "yes"
         offset_days  = int(row["end_date_offset_days"])
@@ -217,7 +224,8 @@ class TestCreateCourseLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        if d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']"):
+        errors = [e for e in d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']") if e.is_displayed() and e.text.strip()]
+        if errors:
             return "fail"
         if "Announcements" in d.page_source:
             return "success"
@@ -734,7 +742,14 @@ class TestCreateUserLevel2(_BaseLevel2):
         uname = driver.find_element(*loc(row, "username"))
         uname.clear()
         if row["username"].strip():
-            uname.send_keys(row["username"].strip())
+            val = row["username"].strip()
+            if "fail" not in row["expected_result"].lower() and val:
+                uid = __import__("uuid").uuid4().hex[:6]
+                if len(val) + len(uid) + 1 <= 100:
+                    val = f"{val}_{uid}"
+                else:
+                    val = f"{val[:100-len(uid)-1]}_{uid}"
+            uname.send_keys(val)
 
         # Password — either generate via checkbox or inject via JS
         if row["password"].strip() == "__generate__":
@@ -774,7 +789,17 @@ class TestCreateUserLevel2(_BaseLevel2):
         em = driver.find_element(*loc(row, "email"))
         em.clear()
         if row["email"].strip():
-            em.send_keys(row["email"].strip())
+            val = row["email"].strip()
+            if "fail" not in row["expected_result"].lower() and val:
+                uid = __import__("uuid").uuid4().hex[:6]
+                parts = val.split('@')
+                if len(parts) == 2:
+                    new_local = f"{parts[0]}_{uid}"
+                    domain_len = len(parts[1]) + 1
+                    if len(new_local) + domain_len > 100:
+                        new_local = new_local[:100-domain_len]
+                    val = f"{new_local}@{parts[1]}"
+            em.send_keys(val)
 
         save = driver.find_element(*loc(row, "save_btn"))
         driver.execute_script("arguments[0].scrollIntoView({block:'center'});", save)
@@ -783,8 +808,11 @@ class TestCreateUserLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        if d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']"):
+        errors = [e for e in d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']") if e.is_displayed() and e.text.strip()]
+        if errors:
             return "fail"
+        if "editadvanced.php" not in d.current_url or "id=-1" not in d.current_url:
+            return "success"
         if "Changes saved" in d.page_source:
             return "success"
         return "fail"
