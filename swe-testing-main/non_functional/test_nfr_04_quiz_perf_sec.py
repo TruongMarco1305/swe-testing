@@ -88,8 +88,10 @@ class TestQuizFormZapScan(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from zapv2 import ZAPv2
-        cls.zap = ZAPv2(proxies={"http": cls.ZAP_PROXY, "https": cls.ZAP_PROXY})
+        # Skips with platform-aware install/launch instructions if the python
+        # client is missing OR the ZAP daemon is not reachable on ZAP_PROXY.
+        from zap_setup import ensure_zap_ready
+        cls.zap = ensure_zap_ready(cls.ZAP_PROXY)
         # Replay one authenticated browser session through ZAP so it has
         # cookies. The QA team should configure a ZAP context for Moodle.
         print("\n  [SEC] Ensure ZAP has a Moodle session context configured.")

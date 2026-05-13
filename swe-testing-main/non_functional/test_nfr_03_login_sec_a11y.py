@@ -42,8 +42,10 @@ class TestLoginSecurityHeaders(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from zapv2 import ZAPv2
-        cls.zap = ZAPv2(proxies={"http": cls.ZAP_PROXY, "https": cls.ZAP_PROXY})
+        # Skips with platform-aware install/launch instructions if the python
+        # client is missing OR the ZAP daemon is not reachable on ZAP_PROXY.
+        from zap_setup import ensure_zap_ready
+        cls.zap = ensure_zap_ready(cls.ZAP_PROXY)
 
     def test_01_passive_scan_login_page(self):
         """Visit login via ZAP proxy; passive scanner inspects headers."""

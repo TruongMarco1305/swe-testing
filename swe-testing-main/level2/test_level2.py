@@ -2,13 +2,28 @@
 LEVEL 2 — Fully Data-Driven Automation Testing
 Moodle LMS: https://ihatetesting.moodlecloud.com/
 
-This single script covers three test cases, each driven by its own CSV file:
-  TC-004  Teacher grades a student assignment  → test_data_tc004_level2.csv
-  TC-005  Admin creates a calendar event       → test_data_tc005_level2.csv
-  TC-006  Teacher sets up a quiz               → test_data_tc006_level2.csv
+This single script covers six test cases (TC-001…TC-006), each driven by its
+own CSV file (test_data_tcNNN_level2.csv).
 
 NO site-specific values are hardcoded here — all URLs, credentials, locators,
 and test data come exclusively from the CSV files.
+
+Verification model (Katalon Recorder → Python Selenium)
+-------------------------------------------------------
+Every assertion in this file uses the Katalon Recorder `verifyText` pattern:
+
+    Katalon step          →  Python Selenium
+    verifyText | text     →  assertIn(text, driver.page_source)  (case-insensitive)
+
+Implementation entry points:
+  * verify_text(driver, expected_text) — module-level helper, the literal
+    Katalon `verifyText` translation. Returns True iff expected_text is a
+    case-insensitive substring of driver.page_source (or of a specific
+    element's text when a locator is supplied).
+  * assert_outcome(testcase, driver, expected, outcome, diag) — wraps
+    verify_text so every TC method does the same thing: for expected=="success"
+    we require the success indicator (outcome=="success"); for any other value
+    we call verify_text on the literal Moodle error sentence from the CSV.
 
 CSV locator convention
 ----------------------
@@ -66,6 +81,72 @@ def loc(row: dict, prefix: str) -> tuple:
     """Return a (By.XXX, value) tuple from <prefix>_locator_type/value columns."""
     by_str = row[f"{prefix}_locator_type"].strip().lower()
     return (BY_MAP[by_str], row[f"{prefix}_locator_value"].strip())
+
+
+def extract_error_text(driver) -> str:
+    """Return concatenated visible error text from id_error_* / .invalid-feedback,
+    or '' if none. Used for diagnostic output when verifyText fails."""
+    sels = ("[id^='id_error_'], .invalid-feedback, .form-control-feedback, "
+            ".error.felement, .help-block.text-danger")
+    msgs = []
+    for el in driver.find_elements(By.CSS_SELECTOR, sels):
+        try:
+            if not el.is_displayed():
+                continue
+        except Exception:
+            continue
+        t = (el.text or "").strip()
+        if t and t not in msgs:
+            msgs.append(t)
+    return " | ".join(msgs)
+
+
+# ---------------------------------------------------------------------------
+# Katalon Recorder verifyText equivalent
+#   Katalon step          →  Python Selenium
+#   verifyText | text     →  assertIn(text, driver.page_source)   (case-insensitive)
+#   verifyText | loc | t  →  assertIn(t, driver.find_element(loc).text)
+# Used in every Level 2 assertion so the test maps 1-to-1 to the original
+# Katalon Recorder verification command.
+# ---------------------------------------------------------------------------
+def verify_text(driver, expected_text: str, locator: tuple = None) -> bool:
+    """Katalon Recorder verifyText: return True if expected_text appears
+    (case-insensitive substring) either in the given element's text or, when
+    no locator is supplied, anywhere in the page source."""
+    needle = (expected_text or "").lower().strip()
+    if not needle:
+        return False
+    if locator is not None:
+        try:
+            el = driver.find_element(*locator)
+            hay = (el.text or "").lower()
+            return needle in hay
+        except Exception:
+            return False
+    return needle in driver.page_source.lower()
+
+
+def assert_outcome(testcase, driver, expected: str, outcome: str, diag: str):
+    """Apply the verifyText pattern to either a success indicator or an error
+    sentence, depending on the CSV expected_result value."""
+    e = (expected or "").strip().lower()
+    # 'success' is a special token — the form must have been accepted; we keep
+    # the existing detection result (outcome == 'success' from _get_outcome).
+    if e == "success":
+        testcase.assertEqual("success", outcome,
+            f"\n  Expected: success  |  Actual: {outcome}\n  {diag}")
+        return
+    # Legacy tokens (kept only if a CSV still uses them)
+    if e in ("fail", "fail_grade", "fail_time", "fail_date", "fail_name", "fail_general"):
+        testcase.assertEqual(e, (outcome or "").lower(),
+            f"\n  Expected: {expected}  |  Actual: {outcome}\n  {diag}")
+        return
+    # Real verifyText path: the literal Moodle sentence must appear on the page.
+    testcase.assertTrue(
+        verify_text(driver, expected),
+        f"\n  verifyText FAILED — expected text not found in page:"
+        f"\n  Expected: {expected}\n  Actual outcome: {outcome}\n  {diag}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +254,7 @@ class TestCreateCourseLevel2(_BaseLevel2):
         sn.clear()
         if row["shortname"].strip():
             val = row["shortname"].strip()
-            if "fail" not in row["expected_result"].lower() and val:
+            if row["expected_result"].strip().lower() == "success" and val:
                 uid = __import__("uuid").uuid4().hex[:6]
                 if len(val) + len(uid) + 1 <= 255:
                     val = f"{val}_{uid}"
@@ -224,12 +305,12 @@ class TestCreateCourseLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        errors = [e for e in d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']") if e.is_displayed() and e.text.strip()]
-        if errors:
-            return "fail"
+        msg = extract_error_text(d)
+        if msg:
+            return msg
         if "Announcements" in d.page_source:
             return "success"
-        return "fail"
+        return "unknown"
 
 
 def _make_course_test(row: dict):
@@ -237,11 +318,10 @@ def _make_course_test(row: dict):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
         expected = row["expected_result"].strip()
-        self.assertEqual(actual, expected,
-            f"\n  [{row['test_case_id']}] fullname={repr(row['fullname'])} "
-            f"shortname={repr(row['shortname'])} end_enabled={row['end_date_enabled']} "
-            f"days={row['end_date_offset_days']}"
-            f"\n  Expected: {expected}  |  Actual: {actual}")
+        diag = (f"[{row['test_case_id']}] fullname={repr(row['fullname'])} "
+                f"shortname={repr(row['shortname'])} end_enabled={row['end_date_enabled']} "
+                f"days={row['end_date_offset_days']}")
+        assert_outcome(self, self.driver, expected, actual, diag)
     test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
     return test_method
 
@@ -369,13 +449,12 @@ class TestAssignLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        errors = [e for e in d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-                  if e.is_displayed() and e.text.strip()]
-        if errors:
-            return "fail"
+        msg = extract_error_text(d)
+        if msg:
+            return msg
         if "Announcements" in d.page_source or d.find_elements(By.CSS_SELECTOR, ".activity-header"):
             return "success"
-        return "fail"
+        return "unknown"
 
 
 def _make_assign_test(row: dict):
@@ -383,11 +462,10 @@ def _make_assign_test(row: dict):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
         expected = row["expected_result"].strip()
-        self.assertEqual(actual, expected,
-            f"\n  [{row['test_case_id']}] name={repr(row['name'])} "
-            f"gradepass={row['gradepass']} due_enabled={row['duedate_enabled']} "
-            f"due_days={row['duedate_offset_days']}"
-            f"\n  Expected: {expected}  |  Actual: {actual}")
+        diag = (f"[{row['test_case_id']}] name={repr(row['name'])} "
+                f"gradepass={row['gradepass']} due_enabled={row['duedate_enabled']} "
+                f"due_days={row['duedate_offset_days']}")
+        assert_outcome(self, self.driver, expected, actual, diag)
     test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
     return test_method
 
@@ -434,19 +512,25 @@ if (nf) {
 
 _JS_CHECK_ERRORS = """
 var hasErr = false;
+var errMsg = '';
 var sels = '[id^="id_error_"], .invalid-feedback, .form-control-feedback, '
          + '.error.felement, .help-block.text-danger';
 document.querySelectorAll(sels).forEach(function(el) {
-    if (hasErr) return;
     var st = window.getComputedStyle(el);
     var ok = (st.display !== 'none') && (st.visibility !== 'hidden') && (el.offsetParent !== null);
-    if (ok && (el.innerText || el.textContent || '').trim()) hasErr = true;
+    var t = (el.innerText || el.textContent || '').trim();
+    if (ok && t) {
+        hasErr = true;
+        if (!errMsg) errMsg = t;
+        else errMsg += ' | ' + t;
+    }
 });
 var gi = document.getElementById('id_grade');
 if (gi && gi.classList.contains('is-invalid')) hasErr = true;
 var marker = document.getElementById('__test_marker');
 if (!marker) { marker = document.createElement('div'); marker.id = '__test_marker'; document.body.appendChild(marker); }
 marker.setAttribute('data-has-error', hasErr ? 'yes' : 'no');
+marker.setAttribute('data-error-msg', errMsg);
 """
 
 
@@ -472,11 +556,15 @@ class TestGradeLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        if d.find_elements(By.CSS_SELECTOR, '#__test_marker[data-has-error="no"]'):
+        ok = d.find_elements(By.CSS_SELECTOR, '#__test_marker[data-has-error="no"]')
+        if ok:
             return "success"
-        if d.find_elements(By.CSS_SELECTOR, '#__test_marker[data-has-error="yes"]'):
-            return "fail"
-        return "fail" if d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']") else "success"
+        err = d.find_elements(By.CSS_SELECTOR, '#__test_marker[data-has-error="yes"]')
+        if err:
+            msg = (err[0].get_attribute("data-error-msg") or "").strip()
+            return msg if msg else "unknown"
+        msg = extract_error_text(d)
+        return msg if msg else "success"
 
 
 def _make_grade_test(row: dict):
@@ -484,9 +572,8 @@ def _make_grade_test(row: dict):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
         expected = row["expected_result"].strip()
-        self.assertEqual(actual, expected,
-            f"\n  [{row['test_case_id']}] grade='{row['grade']}'"
-            f"\n  Expected: {expected}  |  Actual: {actual}")
+        diag = f"[{row['test_case_id']}] grade='{row['grade']}'"
+        assert_outcome(self, self.driver, expected, actual, diag)
     test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
     return test_method
 
@@ -569,15 +656,31 @@ function setCheckbox(id,c){var e=document.getElementById(id);if(e&&e.checked!==c
                     EC.invisibility_of_element_located((By.CSS_SELECTOR, "div[role='dialog']")))
                 outcome = "success"
             except TimeoutException:
-                outcome = "fail"
+                # modal still visible — read visible error text inside it
+                err_texts = driver.execute_script("""
+                    var msgs = [];
+                    document.querySelectorAll(
+                        'div[role="dialog"] [id^="id_error_"], '
+                        + 'div[role="dialog"] .invalid-feedback, '
+                        + 'div[role="dialog"] .form-control-feedback'
+                    ).forEach(function(el) {
+                        var st = window.getComputedStyle(el);
+                        var visible = (st.display !== 'none')
+                                   && (st.visibility !== 'hidden')
+                                   && (el.offsetParent !== null);
+                        var t = (el.innerText || el.textContent || '').trim();
+                        if (visible && t) msgs.push(t);
+                    });
+                    return msgs.join(' | ');
+                """) or ""
+                outcome = err_texts.strip() if err_texts.strip() else "fail"
         except InvalidSessionIdException:
             self.__class__._recover()
             outcome = "success"
 
-        self.assertEqual(outcome, expected,
-            f"\n  [{tc_id}] name={repr(name)} duration={duration_type} "
-            f"minutes={minutes_val} until={until_offset} repeat={repeat}"
-            f"\n  Expected: {expected}  |  Actual: {outcome}")
+        diag = (f"[{tc_id}] name={repr(name)} duration={duration_type} "
+                f"minutes={minutes_val} until={until_offset} repeat={repeat}")
+        assert_outcome(self, driver, expected, outcome, diag)
 
     test_method.__name__ = f"test_{tc_id.replace('-', '_')}"
     return test_method
@@ -665,28 +768,9 @@ class TestQuizSetupLevel2(_BaseLevel2):
         time.sleep(3)
 
     def _get_outcome(self) -> str:
-        driver = self.driver
-        errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        visible = [e for e in errors if e.is_displayed() and e.text.strip()]
-        if visible:
-            ids = " ".join(e.get_attribute("id") for e in visible).lower()
-            if "gradepass" in ids: return "fail_grade"
-            if "timelimit" in ids: return "fail_time"
-            if "timeclose" in ids: return "fail_date"
-            if "name"      in ids: return "fail_name"
-            return "fail_general"
-        return "success"
-
-    @staticmethod
-    def _normalise(raw: str) -> str:
-        raw = raw.strip().lower()
-        if raw == "success":                    return "success"
-        if "name"  in raw:                      return "fail_name"
-        if "grade" in raw:                      return "fail_grade"
-        if "time"  in raw:                      return "fail_time"
-        if "date"  in raw or "close" in raw:    return "fail_date"
-        if raw.startswith("fail"):              return "fail_general"
-        return raw
+        d = self.driver
+        msg = extract_error_text(d)
+        return msg if msg else "success"
 
 
 def _make_quiz_test(row: dict):
@@ -694,13 +778,12 @@ def _make_quiz_test(row: dict):
         self._open_quiz_form(row)
         self._fill_and_submit(row)
         actual   = self._get_outcome()
-        expected = self._normalise(row["expected_result"])
-        self.assertEqual(actual, expected,
-            f"\n  [{row['test_case_id']}] "
-            f"quiz='{row['quiz_name']}' grade={row['grade_to_pass']} "
-            f"timelimit={'off' if row['time_limit_enabled'].lower()=='no' else row['time_limit_minutes']} "
-            f"close={'off' if row['close_date_enabled'].lower()=='no' else row['close_date_offset_days']+'d'}"
-            f"\n  Expected: {expected}  |  Actual: {actual}")
+        expected = row["expected_result"].strip()
+        diag = (f"[{row['test_case_id']}] "
+                f"quiz='{row['quiz_name']}' grade={row['grade_to_pass']} "
+                f"timelimit={'off' if row['time_limit_enabled'].lower()=='no' else row['time_limit_minutes']} "
+                f"close={'off' if row['close_date_enabled'].lower()=='no' else row['close_date_offset_days']+'d'}")
+        assert_outcome(self, self.driver, expected, actual, diag)
     test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
     return test_method
 
@@ -743,7 +826,7 @@ class TestCreateUserLevel2(_BaseLevel2):
         uname.clear()
         if row["username"].strip():
             val = row["username"].strip()
-            if "fail" not in row["expected_result"].lower() and val:
+            if row["expected_result"].strip().lower() == "success" and val:
                 uid = __import__("uuid").uuid4().hex[:6]
                 if len(val) + len(uid) + 1 <= 100:
                     val = f"{val}_{uid}"
@@ -790,7 +873,7 @@ class TestCreateUserLevel2(_BaseLevel2):
         em.clear()
         if row["email"].strip():
             val = row["email"].strip()
-            if "fail" not in row["expected_result"].lower() and val:
+            if row["expected_result"].strip().lower() == "success" and val:
                 uid = __import__("uuid").uuid4().hex[:6]
                 parts = val.split('@')
                 if len(parts) == 2:
@@ -808,14 +891,14 @@ class TestCreateUserLevel2(_BaseLevel2):
 
     def _get_outcome(self) -> str:
         d = self.driver
-        errors = [e for e in d.find_elements(By.CSS_SELECTOR, "[id^='id_error_']") if e.is_displayed() and e.text.strip()]
-        if errors:
-            return "fail"
+        msg = extract_error_text(d)
+        if msg:
+            return msg
         if "editadvanced.php" not in d.current_url or "id=-1" not in d.current_url:
             return "success"
         if "Changes saved" in d.page_source:
             return "success"
-        return "fail"
+        return "unknown"
 
 
 def _make_user_test(row: dict):
@@ -823,11 +906,10 @@ def _make_user_test(row: dict):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
         expected = row["expected_result"].strip()
-        self.assertEqual(actual, expected,
-            f"\n  [{row['test_case_id']}] username={repr(row['username'])} "
-            f"password={repr(row['password'])} firstname={repr(row['firstname'])} "
-            f"lastname={repr(row['lastname'])} email={repr(row['email'])}"
-            f"\n  Expected: {expected}  |  Actual: {actual}")
+        diag = (f"[{row['test_case_id']}] username={repr(row['username'])} "
+                f"password={repr(row['password'])} firstname={repr(row['firstname'])} "
+                f"lastname={repr(row['lastname'])} email={repr(row['email'])}")
+        assert_outcome(self, self.driver, expected, actual, diag)
     test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
     return test_method
 
