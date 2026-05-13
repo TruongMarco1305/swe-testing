@@ -1,0 +1,15 @@
+# Project #3 — Group 11 · Software Testing 2025S2
+# Install all packages:    pip install -r requirements.txt
+# Verify install:          python -c "import selenium, locust, zapv2, axe_selenium_python; print('OK')"
+
+# ── Level 1 & Level 2 (Selenium data-driven) ──────────────────────────────
+selenium>=4.10              # WebDriver core
+webdriver-manager>=4.0      # Auto-downloads matching ChromeDriver
+pandas>=2.0                 # CSV/Excel loading helpers
+openpyxl>=3.1               # Excel support for Group_11.xlsx
+pytest>=7.4                 # Test runner used in README §6
+
+# ── Non-functional tests (test_non_functional.py + 6 NFR files) ──────────
+locust>=2.20                # Performance load testing  (NFR-1 in NFR.md)
+python-owasp-zap-v2.4>=0.0.21  # Security scanning      (NFR-2 in NFR.md)
+axe-selenium-python>=2.1.6  # Accessibility auditing    (NFR-3 in NFR.md)

@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.0, pytest-9.0.3, pluggy-1.6.0 -- /Users/mac/swe-testing/level2/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/mac/swe-testing/level2
+collecting ... collected 169 items / 168 deselected / 1 selected
+
+test_level2.py::TestCreateUserLevel2::test_TC_001_001 FAILED
+
+=================================== FAILURES ===================================
+_____________________ TestCreateUserLevel2.test_TC_001_001 _____________________
+
+self = <test_level2.TestCreateUserLevel2 testMethod=test_TC_001_001>
+
+    def test_method(self):
+        self._fill_and_submit(row)
+        actual   = self._get_outcome()
+        expected = row["expected_result"].strip()
+>       self.assertEqual(actual, expected,
+            f"\n  [{row['test_case_id']}] username={repr(row['username'])} "
+            f"password={repr(row['password'])} firstname={repr(row['firstname'])} "
+            f"lastname={repr(row['lastname'])} email={repr(row['email'])}"
+            f"\n  Expected: {expected}  |  Actual: {actual}")
+E       AssertionError: 'fail' != 'success'
+E       - fail
+E       + success
+E        : 
+E         [TC-001-001] username='usr001_uuuuuuuuuu' password='XuanSang12@' firstname='ffffffffff' lastname='llllllllll' email='usr001_nom@test.com'
+E         Expected: success  |  Actual: fail
+
+test_level2.py:832: AssertionError
+=========================== short test summary info ============================
+FAILED test_level2.py::TestCreateUserLevel2::test_TC_001_001 - AssertionError...
+====================== 1 failed, 168 deselected in 38.91s ======================
