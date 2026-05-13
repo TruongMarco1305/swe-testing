@@ -4,7 +4,7 @@ TC-004 – Teacher Grades a Student Assignment (Level 1)
 Data-driven Selenium test: one unittest method per CSV row.
 Preparation: logs in as admin (full rights) on course 140.
 
-Each test navigates to the grader page (mod/assign id=321), fills the
+Each test navigates to the grader page (mod/assign id=1195, userid=2), fills the
 grade field via React-compatible JS, submits "Save changes", then checks
 the custom __test_marker attribute injected by JS to determine success/fail.
 

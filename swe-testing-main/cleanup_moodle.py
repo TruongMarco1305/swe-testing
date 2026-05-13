@@ -63,11 +63,17 @@ USER_PATTERNS = [
     re.compile(r"^username\d+", re.IGNORECASE),
 ]
 COURSE_FULLNAME_PATTERNS = [
-    re.compile(r"^fn\d+_", re.IGNORECASE),
+    re.compile(r"^f$", re.IGNORECASE),              # exact 'f' (TC-002-003)
+    re.compile(r"^fn$", re.IGNORECASE),             # exact 'fn' (TC-002-004)
+    re.compile(r"^fn\d", re.IGNORECASE),            # fn001..., fn005..., fn006..., fn034...
+    re.compile(r"^fn_", re.IGNORECASE),             # legacy variants
     re.compile(r"^test_course", re.IGNORECASE),
 ]
 COURSE_SHORTNAME_PATTERNS = [
-    re.compile(r"^sn\d+_", re.IGNORECASE),
+    re.compile(r"^s$", re.IGNORECASE),              # exact 's' (TC-002-008)
+    re.compile(r"^sn$", re.IGNORECASE),             # exact 'sn' (TC-002-009)
+    re.compile(r"^sn\d", re.IGNORECASE),            # sn001..., sn005..., sn011..., sn012...
+    re.compile(r"^sn_", re.IGNORECASE),
 ]
 ASSIGN_PATTERNS = [
     re.compile(r"^an\d+_", re.IGNORECASE),
@@ -411,26 +417,34 @@ def cleanup_users(driver, wait, dry_run=False):
 # ══════════════════════════════════════════════════════════════════════════
 # 2. COURSES  -  /course/management.php
 # ══════════════════════════════════════════════════════════════════════════
-def cleanup_courses(driver, wait, dry_run=False):
-    log_section("COURSES - searching via /course/search.php")
-    # Use Moodle's site-wide course search (works on every theme).
-    # Search for the common test prefixes and collect all matching courses.
+def cleanup_courses(driver, wait, dry_run=False, purge_all=False):
+    log_section("COURSES - enumerating via /my/courses.php + /my/")
+    # Strategy: visit the "My courses" dashboard pages which list every
+    # course the admin user owns/enrolls in. Set perpage high to load all.
     sesskey = None
     candidates = []
     seen_cids = set()
-    search_terms = ["fn0", "sn0", "test_course"]
-    for term in search_terms:
-        driver.get(f"{BASE_URL}/course/search.php?q={term}&perpage=200")
+    enum_urls = [
+        f"{BASE_URL}/my/courses.php?perpage=500",
+        f"{BASE_URL}/my/",
+        f"{BASE_URL}/course/index.php?perpage=500",
+    ]
+    for url in enum_urls:
+        driver.get(url)
         try:
             wait.until(EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".courses, .coursebox, h2, h1")))
+                (By.CSS_SELECTOR, ".card, .coursebox, .course-listitem, h1, h2")))
         except TimeoutException:
-            log_warn(f"Could not load search page for '{term}'")
+            log_warn(f"Could not load {url}")
             continue
+        time.sleep(2)
         if sesskey is None:
             sesskey = get_sesskey(driver)
-        # Every search result has a link to /course/view.php?id=<cid>
+        # Each course tile/card on /my/courses.php has a link
+        #   /course/view.php?id=<cid>
+        # plus a heading with the fullname above the meta line.
         links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/course/view.php']")
+        log_step(f"{url.split(BASE_URL)[1]}: {len(links)} course links")
         for link in links:
             try:
                 href = link.get_attribute("href") or ""
@@ -440,27 +454,42 @@ def cleanup_courses(driver, wait, dry_run=False):
                 cid = int(m.group(1))
                 if cid in PROTECTED_COURSE_IDS or cid in seen_cids:
                     continue
-                seen_cids.add(cid)
-                # Get the visible course name (might be fullname or shortname depending on theme)
+                # Get the visible course name from the link itself
                 name = (link.text or "").strip()
                 if not name:
-                    # try ancestor text
+                    # try the title attribute, or surrounding card text
+                    name = (link.get_attribute("title") or "").strip()
+                if not name:
                     try:
-                        parent = link.find_element(By.XPATH, "./ancestor::*[contains(@class,'coursebox') or contains(@class,'card')][1]")
-                        name = (parent.text or "").splitlines()[0]
+                        card = link.find_element(By.XPATH,
+                            "./ancestor::*[contains(@class,'card') or contains(@class,'coursebox') or contains(@class,'course-listitem')][1]")
+                        name = (card.text or "").splitlines()[0]
                     except Exception:
                         name = f"id={cid}"
-                # Read both fullname and shortname from the row text near the link
-                surrounding = ""
+                # Read the surrounding card text to also probe shortname/idnumber
+                surrounding = name
                 try:
-                    surrounding = link.find_element(By.XPATH, "./ancestor::*[self::div or self::li][1]").text
+                    card = link.find_element(By.XPATH,
+                        "./ancestor::*[self::div or self::li][1]")
+                    surrounding = (card.text or "").strip()
                 except Exception:
-                    surrounding = name
+                    pass
+                # Strip whitespace before pattern matching
+                name = name.strip()
+                if purge_all:
+                    # --purge-courses: take every non-protected course (already
+                    # filtered above) without applying name patterns.
+                    seen_cids.add(cid)
+                    candidates.append((cid, name))
+                    continue
                 fullname_match = matches_any(name, COURSE_FULLNAME_PATTERNS) or \
-                                 matches_any(surrounding, COURSE_FULLNAME_PATTERNS)
+                                 any(matches_any(line.strip(), COURSE_FULLNAME_PATTERNS)
+                                     for line in surrounding.splitlines())
                 shortname_match = matches_any(name, COURSE_SHORTNAME_PATTERNS) or \
-                                  matches_any(surrounding, COURSE_SHORTNAME_PATTERNS)
+                                  any(matches_any(line.strip(), COURSE_SHORTNAME_PATTERNS)
+                                      for line in surrounding.splitlines())
                 if fullname_match or shortname_match:
+                    seen_cids.add(cid)
                     candidates.append((cid, name))
             except (NoSuchElementException, ValueError):
                 continue
@@ -470,7 +499,7 @@ def cleanup_courses(driver, wait, dry_run=False):
         driver.get(f"{BASE_URL}/my/")
         sesskey = get_sesskey(driver)
 
-    log_step(f"Found {len(candidates)} test courses to delete (across {len(search_terms)} searches)")
+    log_step(f"Found {len(candidates)} test courses to delete (across {len(enum_urls)} enumeration URLs)")
     if not candidates:
         return 0
 
@@ -493,9 +522,16 @@ def cleanup_courses(driver, wait, dry_run=False):
             const html = await r.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const form = doc.querySelector('form[action*="delete.php"], form');
+            // Prefer the form that points back at delete.php (the confirm form).
+            const form = doc.querySelector('form[action*="delete.php"]')
+                      || doc.querySelector('form');
             if (!form) return {status: 'no-form', url: r.url};
             const fd = new FormData(form);
+            // Ensure submit-button value is included (Moodle sometimes keys
+            // on this to distinguish the final confirm step).
+            doc.querySelectorAll('button[type=submit], input[type=submit]').forEach(b => {
+                if (b.name && b.value && !fd.has(b.name)) fd.set(b.name, b.value);
+            });
             const params = new URLSearchParams();
             fd.forEach((v, k) => params.append(k, v));
             const r2 = await fetch(form.action, {
@@ -504,21 +540,23 @@ def cleanup_courses(driver, wait, dry_run=False):
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: params.toString()
             });
-            return {status: r2.status, url: r2.url, body: (await r2.text()).slice(0,200)};
+            return {status: r2.status, url: r2.url};
         }
         (async () => {
             try {
-                // 1st step: /course/delete.php?id=<cid> -> shows preview/confirm
-                const r1 = await postForm('/course/delete.php?id=' + cid);
-                if (typeof r1.status !== 'number') return done(r1);
-                // After step 1 Moodle redirects to final confirmation; the
-                // form on that page (if any) is the actual delete trigger.
-                // Following the redirect and posting again handles both flows.
-                if (r1.url && r1.url.indexOf('delete.php') !== -1) {
-                    const r2 = await postForm(r1.url);
-                    return done(r2);
+                // Moodle 4.x course delete is a 3-step flow:
+                //   1) GET  /course/delete.php?id=N             -> initial confirm form
+                //   2) POST                                      -> "are you sure?" page (still delete.php)
+                //   3) POST                                      -> actual delete, redirects to /course/management.php
+                // Loop until the response URL leaves delete.php OR we exhaust 5 hops.
+                let last = await postForm('/course/delete.php?id=' + cid);
+                if (typeof last.status !== 'number') return done(last);
+                for (let i = 0; i < 4; i++) {
+                    if (!last.url || last.url.indexOf('delete.php') === -1) break;
+                    last = await postForm(last.url);
+                    if (typeof last.status !== 'number') return done(last);
                 }
-                done(r1);
+                done(last);
             } catch (e) { done({status: 'err', error: e.message}); }
         })();
     """
@@ -822,6 +860,9 @@ def parse_args():
                    help="Delete test quizzes in course 152 (TC-006, NFR)")
     p.add_argument("--events", action="store_true",
                    help="Delete test calendar events (TC-005)")
+    p.add_argument("--purge-courses", action="store_true",
+                   help="Delete EVERY non-protected course (ignores name patterns). "
+                        "Implies --courses. Use with care - wipes Category 1 etc.")
     p.add_argument("--dry-run", action="store_true",
                    help="List matching items without deleting them")
     p.add_argument("--headless", action="store_true",
@@ -832,15 +873,16 @@ def parse_args():
 def main():
     args = parse_args()
     flags = (args.all, args.users, args.courses, args.assignments,
-             args.quizzes, args.events)
+             args.quizzes, args.events, args.purge_courses)
     if not any(flags):
         print("ERROR: no cleanup target specified. Use --all or one of:")
         print("       --users --courses --assignments --quizzes --events")
+        print("       --purge-courses (wipe every non-protected course)")
         print("       Add --dry-run to preview without deleting.")
         sys.exit(1)
 
     run_users  = args.all or args.users
-    run_course = args.all or args.courses
+    run_course = args.all or args.courses or args.purge_courses
     run_assign = args.all or args.assignments
     run_quiz   = args.all or args.quizzes
     run_event  = args.all or args.events
@@ -872,7 +914,9 @@ def main():
             # Use bulk delete (mirrors TC-001-Cleanup in the Katalon recorder)
             totals["users"] = cleanup_users_bulk(driver, wait, dry_run=args.dry_run)
         if run_course:
-            totals["courses"] = cleanup_courses(driver, wait, dry_run=args.dry_run)
+            totals["courses"] = cleanup_courses(driver, wait,
+                                                 dry_run=args.dry_run,
+                                                 purge_all=args.purge_courses)
 
         log_section("SUMMARY")
         verb = "Would delete" if args.dry_run else "Deleted"

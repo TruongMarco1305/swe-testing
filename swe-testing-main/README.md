@@ -241,7 +241,7 @@ Use `__generate__` as the password value in the CSV to tick the "Generate passwo
 | `level1/test_data_tc004.csv` | 17 rows — `test_case_id, grade, expected_result` |
 | `level1/test_grade_level1.py` | Reads the CSV and generates one test per row |
 
-**URL:** `https://ihatetesting.moodlecloud.com/mod/assign/view.php?id=321&action=grader`
+**URL:** `https://ihatetesting.moodlecloud.com/mod/assign/view.php?id=1195&action=grader&userid=2`
 
 **Role:** Logged in as admin, **switched to Teacher role**.
 
