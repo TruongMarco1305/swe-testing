@@ -49,8 +49,8 @@ LOGIN_URL = BASE_URL + "/login/index.php"
 USERNAME  = "phuc.nguyen0310@hcmut.edu.vn"
 PASSWORD  = "Huuphuc0310@"
 
-COURSE_TC003_ASSIGN = 141   # Assignment test course
-COURSE_TC006_QUIZ   = 152   # Quiz test course
+COURSE_TC003_ASSIGN = 425   # Assignment test course (TC_003_MAIN)
+COURSE_TC006_QUIZ   = 426   # Quiz test course (TC_004_MAIN reused for TC-006)
 
 # Protected items - NEVER delete these no matter what
 PROTECTED_USERNAMES = {"admin", USERNAME.lower(), "guest", "phuc.nguyen0310@hcmut.edu.vn"}

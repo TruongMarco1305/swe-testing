@@ -1,2 +1,67 @@
+# ─── Original ───────────────────────────────────────────────────────────
 /Group_11.pdf
 /Project #3 description.pdf
+
+# ─── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ─── Test runner ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ─── Test outputs (regenerated each run) ────────────────────────────────
+non_functional/a11y_*.json
+locust_report.html
+locust_report_*.html
+
+# ─── Debug & scratch files ──────────────────────────────────────────────
+debug_*.py
+debug_*.html
+debug_*.json
+*.scratch.py
+
+# ─── Selenium / browser ─────────────────────────────────────────────────
+chromedriver.exe
+geckodriver.exe
+.wdm/
+
+# ─── IDE / Editor ───────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Python env ─────────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+.env
+
+# ─── OS junk ────────────────────────────────────────────────────────────
+desktop.ini
+$RECYCLE.BIN/
+
+# ─── LaTeX build artifacts (project3 report) ────────────────────────────
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.bbl
+*.blg
+
+# ─── Submission archives (regenerated) ──────────────────────────────────
+*.zip
