@@ -180,14 +180,40 @@ class TestAddUserLevel1(unittest.TestCase):
     # ── Helper: read actual outcome ───────────────────────────────────────
     def _get_outcome(self) -> str:
         """
-        success → "Changes saved" text present  (mirrors verifyTextPresent)
-        fail    → any [id^="id_error_"] element  (mirrors verifyElementPresent)
+        Return either "success" or the concatenated error message text(s)
+        rendered by Moodle. Empty string if neither marker is present.
         """
         if SUCCESS_TEXT in self.driver.page_source:
             return "success"
-        if self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
-            return "fail"
+        # Collect visible error message text from all id_error_* elements
+        msgs = []
+        for el in self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
+            txt = (el.text or "").strip()
+            if txt:
+                msgs.append(txt)
+        if msgs:
+            return " | ".join(msgs)
         return "unknown"
+
+
+def _matches_expected(actual: str, expected: str) -> bool:
+    """Compare actual outcome string to the expected CSV value.
+
+    Rules:
+      * expected == "success"      -> actual must be exactly "success"
+      * any other value            -> actual must NOT be "success" AND every
+                                      semicolon-separated chunk of expected
+                                      must appear as a substring of actual
+                                      (case-insensitive).
+    """
+    a = (actual or "").lower()
+    e = (expected or "").lower().strip()
+    if e == "success":
+        return a == "success"
+    if a == "success":
+        return False
+    chunks = [c.strip() for c in e.split(";") if c.strip()]
+    return all(c in a for c in chunks)
 
 
 # ── Factory: one test method per CSV row ──────────────────────────────────
@@ -195,9 +221,9 @@ def _make_test(row: dict):
     def test_method(self):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
-        expected = row["expected_result"].strip().lower()
-        self.assertEqual(
-            actual, expected,
+        expected = row["expected_result"].strip()
+        self.assertTrue(
+            _matches_expected(actual, expected),
             f"\n  [{row['test_case_id']}]"
             f"\n  username = '{row['username']}'"
             f"\n  password = '{row['password'][:10]}…'"

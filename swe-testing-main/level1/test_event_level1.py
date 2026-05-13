@@ -122,7 +122,7 @@ sS('id_timedurationuntil_minute',0);
 
         # ── determine outcome: did the modal close? ───────────────────────
         # Success → modal disappears (Moodle accepted and reloaded calendar)
-        # Fail    → modal stays open (validation rejected the input)
+        # Fail    → modal stays open; we scrape its error text
         try:
             try:
                 WebDriverWait(driver, 8).until(
@@ -132,20 +132,40 @@ sS('id_timedurationuntil_minute',0);
                 )
                 outcome = "success"
             except TimeoutException:
-                outcome = "fail"
+                # Modal still visible -> read visible error text inside it
+                err_texts = driver.execute_script("""
+                    var msgs = [];
+                    document.querySelectorAll(
+                        'div[role="dialog"] [id^="id_error_"], '
+                        + 'div[role="dialog"] .invalid-feedback, '
+                        + 'div[role="dialog"] .form-control-feedback'
+                    ).forEach(function(el) {
+                        var st = window.getComputedStyle(el);
+                        var visible = (st.display !== 'none')
+                                   && (st.visibility !== 'hidden')
+                                   && (el.offsetParent !== null);
+                        var t = (el.innerText || el.textContent || '').trim();
+                        if (visible && t) msgs.push(t);
+                    });
+                    return msgs.join(' | ');
+                """)
+                outcome = err_texts.strip() if err_texts else "fail"
         except InvalidSessionIdException:
-            # Browser crashed mid-test after clicking Save — Moodle accepted
-            # the input (page reloaded and tore down the session context).
-            # Recover: spin up a fresh driver so subsequent tests can continue.
             try:
                 self.__class__.driver.quit()
             except Exception:
                 pass
             self.__class__._new_driver()
             outcome = "success"
-        self.assertEqual(
-            outcome, expected,
-            f"{tc_id}: expected={expected}, got={outcome} | name={repr(name)} "
+
+        # Substring match: expected="success" -> exact match; else expected
+        # appears as a substring in outcome (case-insensitive).
+        e = expected.lower().strip()
+        a = (outcome or "").lower()
+        matched = (a == "success") if e == "success" else (a != "success" and e in a)
+        self.assertTrue(
+            matched,
+            f"{tc_id}: expected='{expected}' got='{outcome}' | name={repr(name)} "
             f"duration_type={duration_type} minutes={minutes_val} until_offset={until_offset}"
         )
 

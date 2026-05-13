@@ -124,9 +124,16 @@ sS('id_timelimit_timeunit','60');
         time.sleep(4)
 
         outcome = self._get_outcome(driver)
-        self.assertEqual(
-            outcome, expected,
-            f"{tc_id}: expected={expected}, got={outcome} | "
+        # Substring match: expected="success" -> exact, else expected ⊂ outcome
+        e = expected.lower().strip()
+        a = (outcome or "").lower()
+        if e in ("success", "fail_grade", "fail_time", "fail_date", "fail_name"):
+            matched = (outcome == expected)
+        else:
+            matched = (a != "success") and (e in a)
+        self.assertTrue(
+            matched,
+            f"{tc_id}: expected='{expected}' got='{outcome}' | "
             f"name={repr(name)} gradepass={gradepass} "
             f"timelimit_enabled={timelimit_enabled} timelimit_number={timelimit_number} "
             f"timeclose_enabled={timeclose_enabled} close_days={close_days} close_years={close_years}"
@@ -211,8 +218,9 @@ class TestQuizLevel1(unittest.TestCase):
 
     def _get_outcome(self, driver):
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        if errors:
-            return "fail"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
         if "Announcements" in driver.page_source:
             return "success"
         return "success"

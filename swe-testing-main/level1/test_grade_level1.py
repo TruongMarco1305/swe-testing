@@ -81,19 +81,23 @@ _JS_SET_GRADE = """
     }
 """
 
-# JS: inject marker with error detection
+# JS: inject marker with error detection AND error-message capture
 _JS_CHECK_ERRORS = """
     var hasErr = false;
+    var errMsg = '';
     var sels = '[id^="id_error_"], .invalid-feedback, .form-control-feedback, '
              + '.error.felement, .help-block.text-danger';
     document.querySelectorAll(sels).forEach(function(el) {
-        if (hasErr) return;
         var st = window.getComputedStyle(el);
         var visible = (st.display !== 'none')
                    && (st.visibility !== 'hidden')
                    && (el.offsetParent !== null);
-        var hasText = (el.innerText || el.textContent || '').trim() !== '';
-        if (visible && hasText) hasErr = true;
+        var txt = (el.innerText || el.textContent || '').trim();
+        if (visible && txt) {
+            hasErr = true;
+            if (!errMsg) errMsg = txt;
+            else errMsg += ' | ' + txt;
+        }
     });
     var gi = document.getElementById('id_grade');
     if (gi && gi.classList.contains('is-invalid')) hasErr = true;
@@ -104,6 +108,7 @@ _JS_CHECK_ERRORS = """
         document.body.appendChild(marker);
     }
     marker.setAttribute('data-has-error', hasErr ? 'yes' : 'no');
+    marker.setAttribute('data-error-msg', errMsg);
 """
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc004.csv")
@@ -176,7 +181,6 @@ class TestGradeLevel1(unittest.TestCase):
 
     def _get_outcome(self):
         driver = self.driver
-        # Check marker attribute
         markers_ok  = driver.find_elements(
             By.CSS_SELECTOR, '#__test_marker[data-has-error="no"]'
         )
@@ -186,10 +190,24 @@ class TestGradeLevel1(unittest.TestCase):
         if markers_ok:
             return "success"
         if markers_err:
-            return "fail"
-        # Fallback: any visible inline errors
+            msg = (markers_err[0].get_attribute("data-error-msg") or "").strip()
+            return msg if msg else "fail"
+        # Fallback: any visible inline error text
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        return "fail" if errors else "success"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
+        return "success"
+
+    @staticmethod
+    def _matches_expected(actual, expected):
+        a = (actual or "").lower()
+        e = (expected or "").lower().strip()
+        if e == "success":
+            return a == "success"
+        if a == "success":
+            return False
+        return all(c.strip() in a for c in e.split(";") if c.strip())
 
     # ------------------------------------------------------------------
     # Dynamic test generation
@@ -200,9 +218,8 @@ class TestGradeLevel1(unittest.TestCase):
             self._fill_and_submit(row["grade"])
             actual   = self._get_outcome()
             expected = row["expected_result"].strip()
-            self.assertEqual(
-                actual,
-                expected,
+            self.assertTrue(
+                self._matches_expected(actual, expected),
                 f"{row['test_case_id']}: expected '{expected}' but got '{actual}'"
                 f" (grade='{row['grade']}')",
             )

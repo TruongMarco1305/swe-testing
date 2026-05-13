@@ -172,12 +172,25 @@ class TestCreateCourseLevel1(unittest.TestCase):
         time.sleep(4)
 
     def _get_outcome(self) -> str:
-        """Return 'success' if course was created, 'fail' if a validation error is shown."""
-        if self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
-            return "fail"
+        """Return 'success' or the concatenated visible error message(s)."""
+        errs = self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR)
+        if errs:
+            msgs = [(e.text or "").strip() for e in errs if (e.text or "").strip()]
+            if msgs:
+                return " | ".join(msgs)
         if SUCCESS_TEXT in self.driver.page_source:
             return "success"
-        return "fail"  # anything unexpected counts as fail
+        return "unknown"
+
+    @staticmethod
+    def _matches_expected(actual: str, expected: str) -> bool:
+        a = (actual or "").lower()
+        e = (expected or "").lower().strip()
+        if e == "success":
+            return a == "success"
+        if a == "success":
+            return False
+        return all(c.strip() in a for c in e.split(";") if c.strip())
 
     @staticmethod
     def _make_test(row: dict):
@@ -189,7 +202,7 @@ class TestCreateCourseLevel1(unittest.TestCase):
         offset_days  = int(row["end_date_offset_days"])
         offset_years = int(row["end_date_offset_years"])
         numsections  = int(row["numsections"])
-        expected     = row["expected_result"].strip().lower()
+        expected     = row["expected_result"].strip()
 
         def test_method(self):
             self._fill_and_submit(
@@ -198,8 +211,8 @@ class TestCreateCourseLevel1(unittest.TestCase):
                 numsections
             )
             actual = self._get_outcome()
-            self.assertEqual(
-                actual, expected,
+            self.assertTrue(
+                self._matches_expected(actual, expected),
                 f"[{tc_id}] Expected '{expected}' but got '{actual}'\n"
                 f"  fullname={fullname!r}, shortname={shortname!r}, "
                 f"end_enabled={end_enabled}, offset_days={offset_days}, "

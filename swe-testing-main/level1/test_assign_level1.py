@@ -250,14 +250,25 @@ class TestAssignLevel1(unittest.TestCase):
         time.sleep(3)
 
     def _get_outcome(self):
-        """Return 'success' or 'fail' based on the current page."""
+        """Return 'success' or concatenated error message text(s)."""
         driver = self.driver
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        if errors:
-            return "fail"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
         if "Announcements" in driver.page_source:
             return "success"
-        return "fail"
+        return "unknown"
+
+    @staticmethod
+    def _matches_expected(actual, expected):
+        a = (actual or "").lower()
+        e = (expected or "").lower().strip()
+        if e == "success":
+            return a == "success"
+        if a == "success":
+            return False
+        return all(c.strip() in a for c in e.split(";") if c.strip())
 
     # ------------------------------------------------------------------
     # Dynamic test generation
@@ -268,9 +279,8 @@ class TestAssignLevel1(unittest.TestCase):
             self._fill_and_submit(row)
             actual   = self._get_outcome()
             expected = row["expected_result"].strip()
-            self.assertEqual(
-                actual,
-                expected,
+            self.assertTrue(
+                self._matches_expected(actual, expected),
                 f"{row['test_case_id']}: expected '{expected}' but got '{actual}'"
                 f" (name='{row['name'][:30]}...', gradepass={row['gradepass']})",
             )
