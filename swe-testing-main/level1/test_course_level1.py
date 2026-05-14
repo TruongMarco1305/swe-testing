@@ -183,14 +183,14 @@ class TestCreateCourseLevel1(unittest.TestCase):
         return "unknown"
 
     @staticmethod
-    def _matches_expected(actual: str, expected: str) -> bool:
-        a = (actual or "").lower()
-        e = (expected or "").lower().strip()
-        if e == "success":
-            return a == "success"
-        if a == "success":
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
             return False
-        return all(c.strip() in a for c in e.split(";") if c.strip())
+        return needle in driver.page_source.lower()
 
     @staticmethod
     def _make_test(row: dict):
@@ -211,9 +211,17 @@ class TestCreateCourseLevel1(unittest.TestCase):
                 numsections
             )
             actual = self._get_outcome()
+            # "success" → form accepted (existing outcome detection);
+            # otherwise → Katalon verifyText against the live page source.
+            if expected.lower() == "success":
+                ok = (actual == "success")
+                fail_msg = f"[{tc_id}] Expected SUCCESS but got error: {actual}"
+            else:
+                ok = self._verify_text(self.driver, expected)
+                fail_msg = f"[{tc_id}] verifyText FAILED — '{expected}' not found in page (outcome={actual})"
             self.assertTrue(
-                self._matches_expected(actual, expected),
-                f"[{tc_id}] Expected '{expected}' but got '{actual}'\n"
+                ok,
+                f"{fail_msg}\n"
                 f"  fullname={fullname!r}, shortname={shortname!r}, "
                 f"end_enabled={end_enabled}, offset_days={offset_days}, "
                 f"offset_years={offset_years}"

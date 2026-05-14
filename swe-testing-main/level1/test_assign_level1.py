@@ -261,14 +261,14 @@ class TestAssignLevel1(unittest.TestCase):
         return "unknown"
 
     @staticmethod
-    def _matches_expected(actual, expected):
-        a = (actual or "").lower()
-        e = (expected or "").lower().strip()
-        if e == "success":
-            return a == "success"
-        if a == "success":
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
             return False
-        return all(c.strip() in a for c in e.split(";") if c.strip())
+        return needle in driver.page_source.lower()
 
     # ------------------------------------------------------------------
     # Dynamic test generation
@@ -279,9 +279,14 @@ class TestAssignLevel1(unittest.TestCase):
             self._fill_and_submit(row)
             actual   = self._get_outcome()
             expected = row["expected_result"].strip()
+            # success → outcome marker; otherwise → Katalon verifyText
+            if expected.lower() == "success":
+                ok = (actual == "success")
+            else:
+                ok = self._verify_text(self.driver, expected)
             self.assertTrue(
-                self._matches_expected(actual, expected),
-                f"{row['test_case_id']}: expected '{expected}' but got '{actual}'"
+                ok,
+                f"{row['test_case_id']}: verifyText FAILED — '{expected}' not in page (outcome='{actual}')"
                 f" (name='{row['name'][:30]}...', gradepass={row['gradepass']})",
             )
         test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"

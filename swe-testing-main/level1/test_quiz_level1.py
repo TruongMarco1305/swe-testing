@@ -124,16 +124,17 @@ sS('id_timelimit_timeunit','60');
         time.sleep(4)
 
         outcome = self._get_outcome(driver)
-        # Substring match: expected="success" -> exact, else expected ⊂ outcome
+        # Katalon verifyText: `verifyText | <text>` → assertIn(text, page_source).
+        # "success" + legacy fail_* tokens stay as exact-match outcome checks;
+        # any literal Moodle sentence is verified against the live page source.
         e = expected.lower().strip()
-        a = (outcome or "").lower()
         if e in ("success", "fail_grade", "fail_time", "fail_date", "fail_name"):
             matched = (outcome == expected)
         else:
-            matched = (a != "success") and (e in a)
+            matched = self._verify_text(driver, expected)
         self.assertTrue(
             matched,
-            f"{tc_id}: expected='{expected}' got='{outcome}' | "
+            f"{tc_id}: verifyText FAILED — '{expected}' not in page (outcome='{outcome}') | "
             f"name={repr(name)} gradepass={gradepass} "
             f"timelimit_enabled={timelimit_enabled} timelimit_number={timelimit_number} "
             f"timeclose_enabled={timeclose_enabled} close_days={close_days} close_years={close_years}"
@@ -224,6 +225,16 @@ class TestQuizLevel1(unittest.TestCase):
         if "Announcements" in driver.page_source:
             return "success"
         return "success"
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
 
 # ── attach test methods dynamically ──────────────────────────────────────────

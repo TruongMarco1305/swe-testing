@@ -196,24 +196,20 @@ class TestAddUserLevel1(unittest.TestCase):
         return "unknown"
 
 
-def _matches_expected(actual: str, expected: str) -> bool:
-    """Compare actual outcome string to the expected CSV value.
+def _verify_text(driver, expected_text: str) -> bool:
+    """Katalon Recorder verifyText → Python Selenium.
 
-    Rules:
-      * expected == "success"      -> actual must be exactly "success"
-      * any other value            -> actual must NOT be "success" AND every
-                                      semicolon-separated chunk of expected
-                                      must appear as a substring of actual
-                                      (case-insensitive).
+        verifyText | <text>   →   assertIn(<text>, driver.page_source)
+                                  (case-insensitive substring match)
+
+    Returns True iff expected_text appears anywhere in the rendered page
+    source. This is the literal translation of the Katalon `verifyText`
+    command and is what every non-success assertion in this file uses.
     """
-    a = (actual or "").lower()
-    e = (expected or "").lower().strip()
-    if e == "success":
-        return a == "success"
-    if a == "success":
+    needle = (expected_text or "").lower().strip()
+    if not needle:
         return False
-    chunks = [c.strip() for c in e.split(";") if c.strip()]
-    return all(c in a for c in chunks)
+    return needle in driver.page_source.lower()
 
 
 # ── Factory: one test method per CSV row ──────────────────────────────────
@@ -222,13 +218,22 @@ def _make_test(row: dict):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
         expected = row["expected_result"].strip()
+        # "success" is a control token: the form must have been accepted —
+        # we rely on _get_outcome() which already checks SUCCESS_TEXT.
+        # Any other value is a Moodle error sentence → verifyText against
+        # the live page source (the Katalon-faithful path).
+        if expected.lower() == "success":
+            ok = (actual == "success")
+            label = f"Expected SUCCESS but got error: {actual}"
+        else:
+            ok = _verify_text(self.driver, expected)
+            label = f"verifyText FAILED — '{expected}' not in page (outcome={actual})"
         self.assertTrue(
-            _matches_expected(actual, expected),
-            f"\n  [{row['test_case_id']}]"
+            ok,
+            f"\n  [{row['test_case_id']}] {label}"
             f"\n  username = '{row['username']}'"
             f"\n  password = '{row['password'][:10]}…'"
             f"\n  email    = '{row['email']}'"
-            f"\n  Expected : {expected}  |  Actual : {actual}"
         )
     return test_method
 

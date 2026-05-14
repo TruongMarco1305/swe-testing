@@ -158,14 +158,17 @@ sS('id_timedurationuntil_minute',0);
             self.__class__._new_driver()
             outcome = "success"
 
-        # Substring match: expected="success" -> exact match; else expected
-        # appears as a substring in outcome (case-insensitive).
+        # Katalon verifyText: `verifyText | <text>` → assertIn(text, page_source).
+        # "success" stays as exact outcome marker; any literal sentence is
+        # verified against the live page source.
         e = expected.lower().strip()
-        a = (outcome or "").lower()
-        matched = (a == "success") if e == "success" else (a != "success" and e in a)
+        if e == "success":
+            matched = ((outcome or "").lower() == "success")
+        else:
+            matched = self._verify_text(driver, expected)
         self.assertTrue(
             matched,
-            f"{tc_id}: expected='{expected}' got='{outcome}' | name={repr(name)} "
+            f"{tc_id}: verifyText FAILED — '{expected}' not in page (outcome='{outcome}') | name={repr(name)} "
             f"duration_type={duration_type} minutes={minutes_val} until_offset={until_offset}"
         )
 
@@ -251,6 +254,17 @@ class TestCalendarEventLevel1(unittest.TestCase):
     def _get_outcome(self, driver):
         """Unused — outcome is now detected inline via explicit wait."""
         pass
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source — including
+        the open dialog/modal that contains the error message. Equivalent to:
+        `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
 
 # ── dynamically attach test methods ──────────────────────────────────────────
