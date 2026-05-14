@@ -46,6 +46,7 @@ import csv
 import os
 import time
 import unittest
+import uuid
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -69,6 +70,21 @@ BY_MAP = {
 }
 
 _DIR = os.path.dirname(__file__)
+
+# ---------------------------------------------------------------------------
+# Session-wide uniqueness tag
+# ---------------------------------------------------------------------------
+# A single random suffix generated once per pytest run, then applied uniformly
+# to every username / email / shortname / fullname produced by the framework.
+# Why session-wide instead of per-row?
+#   * Per-row UUIDs guarantee no collision between runs, but break the
+#     duplicate-detection test pairs (TC-001-024 / TC-002-018 / etc.) because
+#     the "success" row and its matching "duplicate" row end up with different
+#     suffixes, so Moodle never sees them as duplicates.
+#   * A session-wide tag still rotates between runs (so no cross-run collision)
+#     while keeping all rows in the SAME run consistent — meaning the
+#     duplicate-test row hits the exact value the success row just inserted.
+_SESSION_TAG = uuid.uuid4().hex[:6]
 
 
 def load_csv(filename: str) -> list:
@@ -254,12 +270,15 @@ class TestCreateCourseLevel2(_BaseLevel2):
         sn.clear()
         if row["shortname"].strip():
             val = row["shortname"].strip()
-            if row["expected_result"].strip().lower() == "success" and val:
-                uid = __import__("uuid").uuid4().hex[:6]
-                if len(val) + len(uid) + 1 <= 255:
-                    val = f"{val}_{uid}"
-                else:
-                    val = f"{val[:255-len(uid)-1]}_{uid}"
+            # Apply the SAME _SESSION_TAG to every row so the duplicate-detection
+            # pair (e.g. TC-002-001 success + TC-002-018 duplicate) collide on
+            # the exact same value. Between runs the tag rotates, so old data
+            # from previous sessions does not block fresh inserts.
+            tag = _SESSION_TAG
+            if len(val) + len(tag) + 1 <= 255:
+                val = f"{val}_{tag}"
+            else:
+                val = f"{val[:255-len(tag)-1]}_{tag}"
             sn.send_keys(val)
 
         end_enabled  = row["end_date_enabled"].strip().lower() == "yes"
@@ -821,17 +840,19 @@ class TestCreateUserLevel2(_BaseLevel2):
         driver.get(row["new_user_url"].strip())
         time.sleep(5)
 
-        # Username
+        # Username — apply the SAME _SESSION_TAG to every row so the
+        # duplicate-detection pair (e.g. TC-001-024 admin / TC-001-034 admin)
+        # collide on the exact value the success row just inserted. Between
+        # runs the tag rotates, so old data does not block fresh inserts.
         uname = driver.find_element(*loc(row, "username"))
         uname.clear()
         if row["username"].strip():
             val = row["username"].strip()
-            if row["expected_result"].strip().lower() == "success" and val:
-                uid = __import__("uuid").uuid4().hex[:6]
-                if len(val) + len(uid) + 1 <= 100:
-                    val = f"{val}_{uid}"
-                else:
-                    val = f"{val[:100-len(uid)-1]}_{uid}"
+            tag = _SESSION_TAG
+            if len(val) + len(tag) + 1 <= 100:
+                val = f"{val}_{tag}"
+            else:
+                val = f"{val[:100-len(tag)-1]}_{tag}"
             uname.send_keys(val)
 
         # Password — either generate via checkbox or inject via JS
@@ -868,20 +889,21 @@ class TestCreateUserLevel2(_BaseLevel2):
         if row["lastname"].strip():
             ln.send_keys(row["lastname"].strip())
 
-        # Email
+        # Email — apply the SAME _SESSION_TAG so the email-uniqueness
+        # check sees the value as new on first insert (within a fresh run)
+        # but as duplicate on the second matching row.
         em = driver.find_element(*loc(row, "email"))
         em.clear()
         if row["email"].strip():
             val = row["email"].strip()
-            if row["expected_result"].strip().lower() == "success" and val:
-                uid = __import__("uuid").uuid4().hex[:6]
-                parts = val.split('@')
-                if len(parts) == 2:
-                    new_local = f"{parts[0]}_{uid}"
-                    domain_len = len(parts[1]) + 1
-                    if len(new_local) + domain_len > 100:
-                        new_local = new_local[:100-domain_len]
-                    val = f"{new_local}@{parts[1]}"
+            tag = _SESSION_TAG
+            parts = val.split('@')
+            if len(parts) == 2:
+                new_local = f"{parts[0]}_{tag}"
+                domain_len = len(parts[1]) + 1
+                if len(new_local) + domain_len > 100:
+                    new_local = new_local[:100-domain_len]
+                val = f"{new_local}@{parts[1]}"
             em.send_keys(val)
 
         save = driver.find_element(*loc(row, "save_btn"))
