@@ -15,11 +15,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-BASE_URL   = "https://ihatetesting.moodlecloud.com"
-ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS = "Huuphuc0310@"
-COURSE_ID  = 426
-SECTION_ID = 2121
+BASE_URL   = "https://xuansang1234.moodlecloud.com"
+ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS = "Abcdxyz12@"
+COURSE_ID  = 12
+SECTION_ID = 39
 QUIZ_URL   = (
     f"{BASE_URL}/course/modedit.php"
     f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
@@ -187,7 +187,7 @@ class TestQuizLevel1(unittest.TestCase):
         wait.until(EC.url_contains("/my/"))
         time.sleep(2)
 
-        # switch to Teacher role on course 152
+        # switch to Teacher role on course 12
         driver.get(
             f"{BASE_URL}/course/switchrole.php"
             f"?id={COURSE_ID}&switchrole=-1"

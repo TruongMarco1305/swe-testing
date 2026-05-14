@@ -4,7 +4,7 @@ TC-004 – Teacher Grades a Student Assignment (Level 1)
 Data-driven Selenium test: one unittest method per CSV row.
 Preparation: logs in as admin (full rights) on course 140.
 
-Each test navigates to the grader page (mod/assign id=1195, userid=2), fills the
+Each test navigates to the grader page (mod/assign id=41, userid=2), fills the
 grade field via React-compatible JS, submits "Save changes", then checks
 the custom __test_marker attribute injected by JS to determine success/fail.
 
@@ -31,11 +31,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-BASE_URL   = "https://ihatetesting.moodlecloud.com"
+BASE_URL   = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL  = f"{BASE_URL}/login/index.php"
-GRADER_URL = f"{BASE_URL}/mod/assign/view.php?id=1195&action=grader&userid=2"
-ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS = "Huuphuc0310@"
+GRADER_URL = f"{BASE_URL}/mod/assign/view.php?id=41&action=grader&userid=2"
+ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS = "Abcdxyz12@"
 
 # JS: set grade using React-compatible native input setter + dispatch events
 _JS_SET_GRADE = """
@@ -146,7 +146,7 @@ class TestGradeLevel1(unittest.TestCase):
             ADMIN_PASS,
         )
         time.sleep(3)
-        driver.get(f"{BASE_URL}/course/view.php?id=140")
+        driver.get(f"{BASE_URL}/course/view.php?id=10")
         time.sleep(2)
 
     # ------------------------------------------------------------------

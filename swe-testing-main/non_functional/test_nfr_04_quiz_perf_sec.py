@@ -1,7 +1,7 @@
 """
 NON-FUNCTIONAL TEST FILE 04 — QUIZ SETUP: PERFORMANCE + SECURITY
 Feature : Moodle LMS — Teacher Sets Up a Quiz
-Site    : https://ihatetesting.moodlecloud.com/
+Site    : https://xuansang1234.moodlecloud.com/
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NFR-1  PERFORMANCE TESTING   (Locust)
@@ -24,17 +24,17 @@ import re
 import time
 import unittest
 
-BASE_URL    = "https://ihatetesting.moodlecloud.com"
+BASE_URL    = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL   = BASE_URL + "/login/index.php"
-COURSE_ID   = 426
-SECTION_ID  = 2121
+COURSE_ID   = 12
+SECTION_ID  = 39
 COURSE_URL  = BASE_URL + f"/course/view.php?id={COURSE_ID}"
 QUIZ_ADD_URL = (BASE_URL
                 + f"/course/modedit.php?add=quiz&type"
                   f"&course={COURSE_ID}&sectionid={SECTION_ID}"
                   f"&return=0&beforemod=0")
-USERNAME    = "phuc.nguyen0310@hcmut.edu.vn"
-PASSWORD    = "Huuphuc0310@"
+USERNAME    = "sang.truong2005@hcmut.edu.vn"
+PASSWORD    = "Abcdxyz12@"
 
 
 # ══════════════════════════════════════════════════════════════════════════

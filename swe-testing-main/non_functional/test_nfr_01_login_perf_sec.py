@@ -1,7 +1,7 @@
 """
 NON-FUNCTIONAL TEST FILE 01 — LOGIN: PERFORMANCE + SECURITY
 Feature : Moodle LMS — Login page (entry point to Teacher's Quiz Setup)
-Site    : https://ihatetesting.moodlecloud.com/login/index.php
+Site    : https://xuansang1234.moodlecloud.com/login/index.php
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NFR-1  PERFORMANCE TESTING  (Locust)
@@ -25,10 +25,10 @@ import time
 import unittest
 
 # ── Shared configuration ──────────────────────────────────────────────────
-BASE_URL  = "https://ihatetesting.moodlecloud.com"
+BASE_URL  = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL = BASE_URL + "/login/index.php"
-USERNAME  = "phuc.nguyen0310@hcmut.edu.vn"
-PASSWORD  = "Huuphuc0310@"
+USERNAME  = "sang.truong2005@hcmut.edu.vn"
+PASSWORD  = "Abcdxyz12@"
 
 
 # ══════════════════════════════════════════════════════════════════════════

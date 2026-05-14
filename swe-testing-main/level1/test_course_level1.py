@@ -44,12 +44,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ── Configuration (hardcoded — Level 1) ───────────────────────────────────
-BASE_URL        = "https://ihatetesting.moodlecloud.com/"
+BASE_URL        = "https://xuansang1234.moodlecloud.com/"
 LOGIN_URL       = BASE_URL + "login/index.php"
 NEW_COURSE_URL  = BASE_URL + "course/edit.php?category=0"
 
-ADMIN_USER  = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS  = "Huuphuc0310@"
+ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS  = "Abcdxyz12@"
 
 # Hardcoded locators (from krecorder)
 LOC_FULLNAME    = (By.ID, "id_fullname")

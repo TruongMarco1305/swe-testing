@@ -267,7 +267,7 @@ function Invoke-LocustMenu {
     Write-Step "Starting Locust with $file"
     Write-Host "-> Open http://localhost:8089 in your browser" -ForegroundColor Cyan
     Write-Host "-> Number of users: 50,  Spawn rate: 5"        -ForegroundColor Cyan
-    Write-Host "-> Host: https://ihatetesting.moodlecloud.com" -ForegroundColor Cyan
+    Write-Host "-> Host: https://xuansang1234.moodlecloud.com" -ForegroundColor Cyan
     Write-Host "-> Press Ctrl+C in this window when done"      -ForegroundColor Cyan
 
     Push-Location $NfrDir

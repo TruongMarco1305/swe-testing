@@ -1,7 +1,7 @@
 """
 NON-FUNCTIONAL TEST FILE 02 — LOGIN: PERFORMANCE + ACCESSIBILITY
 Feature : Moodle LMS — Login page
-Site    : https://ihatetesting.moodlecloud.com/login/index.php
+Site    : https://xuansang1234.moodlecloud.com/login/index.php
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 NFR-1  PERFORMANCE TESTING   (Locust)
@@ -22,7 +22,7 @@ import json
 import os
 import unittest
 
-BASE_URL  = "https://ihatetesting.moodlecloud.com"
+BASE_URL  = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL = BASE_URL + "/login/index.php"
 
 

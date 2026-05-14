@@ -5,16 +5,16 @@ cleanup_moodle.py - Delete test data created by Project #3 test suites
 WHAT THIS SCRIPT DELETES
   - Users with names matching the TC-001 patterns       (usr*, test_*, ...)
   - Courses with names matching the TC-002 patterns     (fn*, sn*, ...)
-  - Assignments inside course 141 (TC-003)              (an*, a, as, ...)
+  - Assignments inside course 10 (TC-003)               (an*, a, as, ...)
   - Calendar events with TC-005 patterns                (t*, ti, ...)
-  - Quizzes inside course 152 (TC-006 + NFR files)      (qn*, perf_*, xss_*)
+  - Quizzes inside course 12 (TC-006 + NFR files)       (qn*, perf_*, xss_*)
 
 USAGE
   python cleanup_moodle.py --all                # Clean up everything
   python cleanup_moodle.py --users              # Only users
-  python cleanup_moodle.py --quizzes            # Only quizzes in course 152
+  python cleanup_moodle.py --quizzes            # Only quizzes in course 12
   python cleanup_moodle.py --courses            # Only courses
-  python cleanup_moodle.py --assignments        # Only assignments in course 141
+  python cleanup_moodle.py --assignments        # Only assignments in course 10
   python cleanup_moodle.py --events             # Only calendar events
   python cleanup_moodle.py --dry-run --all      # List matches without deleting
   python cleanup_moodle.py --headless --all     # Run without showing browser
@@ -23,7 +23,7 @@ NOTES
   - Builds on the same Selenium/webdriver-manager stack as the test suite
   - Logs every deletion to the console with [DEL] / [SKIP] / [DRY] prefixes
   - Safe to re-run: idempotent (skips items already deleted)
-  - DOES NOT delete the admin/test account itself, courses 141 or 152, or
+  - DOES NOT delete the admin/test account itself, courses 10 or 12, or
     the Moodle built-in 'admin' user
 """
 
@@ -44,16 +44,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ── Configuration ──────────────────────────────────────────────────────────
-BASE_URL  = "https://ihatetesting.moodlecloud.com"
+BASE_URL  = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL = BASE_URL + "/login/index.php"
-USERNAME  = "phuc.nguyen0310@hcmut.edu.vn"
-PASSWORD  = "Huuphuc0310@"
+USERNAME  = "sang.truong2005@hcmut.edu.vn"
+PASSWORD  = "Abcdxyz12@"
 
-COURSE_TC003_ASSIGN = 425   # Assignment test course (TC_003_MAIN)
-COURSE_TC006_QUIZ   = 426   # Quiz test course (TC_004_MAIN reused for TC-006)
+COURSE_TC003_ASSIGN = 10    # Assignment test course (TC_003_MAIN)
+COURSE_TC006_QUIZ   = 12    # Quiz test course (TC_004_MAIN reused for TC-006)
 
 # Protected items - NEVER delete these no matter what
-PROTECTED_USERNAMES = {"admin", USERNAME.lower(), "guest", "phuc.nguyen0310@hcmut.edu.vn"}
+PROTECTED_USERNAMES = {"admin", USERNAME.lower(), "guest", "sang.truong2005@hcmut.edu.vn"}
 PROTECTED_COURSE_IDS = {1, COURSE_TC003_ASSIGN, COURSE_TC006_QUIZ}
 
 # Match patterns - any item whose name matches ANY of these gets deleted
@@ -855,9 +855,9 @@ def parse_args():
     p.add_argument("--users", action="store_true", help="Delete test users (TC-001)")
     p.add_argument("--courses", action="store_true", help="Delete test courses (TC-002)")
     p.add_argument("--assignments", action="store_true",
-                   help="Delete test assignments in course 141 (TC-003)")
+                   help="Delete test assignments in course 10 (TC-003)")
     p.add_argument("--quizzes", action="store_true",
-                   help="Delete test quizzes in course 152 (TC-006, NFR)")
+                   help="Delete test quizzes in course 12 (TC-006, NFR)")
     p.add_argument("--events", action="store_true",
                    help="Delete test calendar events (TC-005)")
     p.add_argument("--purge-courses", action="store_true",

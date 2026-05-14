@@ -2,7 +2,7 @@
 TC-003 – Teacher Creates an Assignment (Level 1)
 =================================================
 Data-driven Selenium test: one unittest method per CSV row.
-Preparation: logs in as admin and switches role to Teacher on course 141.
+Preparation: logs in as admin and switches role to Teacher on course 10.
 Each test case navigates to the "Add Assignment" form, fills fields, submits,
 and asserts the expected outcome (success / fail).
 
@@ -28,14 +28,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-BASE_URL    = "https://ihatetesting.moodlecloud.com"
+BASE_URL    = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL   = f"{BASE_URL}/login/index.php"
 ASSIGN_URL  = (
     f"{BASE_URL}/course/modedit.php"
-    "?add=assign&type&course=425&sectionid=2116&return=0&beforemod=0"
+    "?add=assign&type&course=10&sectionid=39&return=0&beforemod=0"
 )
-ADMIN_USER  = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS  = "Huuphuc0310@"
+ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS  = "Abcdxyz12@"
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc003.csv")
 
@@ -65,7 +65,7 @@ class TestAssignLevel1(unittest.TestCase):
     # ------------------------------------------------------------------
     @classmethod
     def _login_and_switch_role(cls):
-        """Login as admin and switch role to Teacher on course 141."""
+        """Login as admin and switch role to Teacher on course 10."""
         driver = cls.driver
         driver.get(LOGIN_URL)
         driver.execute_script(

@@ -1,6 +1,6 @@
 """
 LEVEL 2 — Fully Data-Driven Automation Testing
-Moodle LMS: https://ihatetesting.moodlecloud.com/
+Moodle LMS: https://xuansang1234.moodlecloud.com/
 
 This single script covers six test cases (TC-001…TC-006), each driven by its
 own CSV file (test_data_tcNNN_level2.csv).
@@ -361,7 +361,7 @@ class TestAssignLevel2(_BaseLevel2):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Switch role to Teacher on course 141
+        # Switch role to Teacher on course 10
         cls.driver.get(
             cls.rows[0]["site_url"].rstrip("/") +
             "/course/switchrole.php?id=1&switchrole=-1&returnurl=%2Fmy%2Findex.php"
@@ -829,8 +829,8 @@ class TestCreateUserLevel2(_BaseLevel2):
         driver.get(login_url)
         wait.until(EC.presence_of_element_located((By.ID, "username")))
         cls._dismiss_cookie_banner()
-        driver.find_element(By.ID, "username").send_keys("phuc.nguyen0310@hcmut.edu.vn")
-        driver.find_element(By.ID, "password").send_keys("Huuphuc0310@")
+        driver.find_element(By.ID, "username").send_keys("sang.truong2005@hcmut.edu.vn")
+        driver.find_element(By.ID, "password").send_keys("Abcdxyz12@")
         driver.execute_script("document.getElementById('loginbtn').click();")
         wait.until(EC.url_contains("/my/"))
         time.sleep(1)
