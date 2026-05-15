@@ -82,14 +82,22 @@ function setCheckbox(id,checked){
 }
 """
 
+        # Start time = NOW + 1 hour (gives Moodle a clean future-anchor that
+        # is independent of the modal's default 'no duration' state and that
+        # the 'until' field can always be placed after when offset >= 0).
+        # Do NOT touch id_timestart_minute=0 — that retroactively moves start
+        # backward, leaves the hidden until-field at the original 'now',
+        # and tricks Moodle's backend validator into reporting
+        # 'duration until is before the start time' for every minutes-mode
+        # submission regardless of the value entered.
         js_fill = js_helpers + f"\nnS('id_name',{repr(name)});\n"
         js_fill += """
-var tod=new Date();
+var tod=new Date(Date.now()+60*60*1000);
 sS('id_timestart_day',tod.getDate());
 sS('id_timestart_month',tod.getMonth()+1);
 sS('id_timestart_year',tod.getFullYear());
 sS('id_timestart_hour',tod.getHours());
-sS('id_timestart_minute',0);
+sS('id_timestart_minute',tod.getMinutes());
 """
 
         if duration_type == "none":
@@ -106,7 +114,7 @@ sS('id_timedurationuntil_day',until.getDate());
 sS('id_timedurationuntil_month',until.getMonth()+1);
 sS('id_timedurationuntil_year',until.getFullYear());
 sS('id_timedurationuntil_hour',until.getHours());
-sS('id_timedurationuntil_minute',0);
+sS('id_timedurationuntil_minute',until.getMinutes());
 """
 
         if repeat:
@@ -120,32 +128,35 @@ sS('id_timedurationuntil_minute',0);
             (By.XPATH, "//div[@role='dialog']//button[@data-action='save']")))
         driver.execute_script("arguments[0].click();", save_btn)
 
-        # ── determine outcome: did the modal close? ───────────────────────
-        # Success → modal disappears (Moodle accepted and reloaded calendar)
-        # Fail    → modal stays open; we scrape its error text
+        # ── determine outcome: did the New-Event modal close? ─────────────
+        # Moodle's calendar page always has 3+ <div role="dialog"> elements
+        # (Notification window, modal templates) that ship with
+        # visibility:hidden. A bare `div[role="dialog"]` selector for the
+        # invisibility-wait therefore short-circuits to "success" on the
+        # first hidden dialog and masks every real validation failure.
+        # Instead, key off `#id_name` — the New-Event modal owns this input,
+        # and Moodle removes it from the DOM when the modal closes.
         try:
             try:
                 WebDriverWait(driver, 8).until(
-                    EC.invisibility_of_element_located(
-                        (By.CSS_SELECTOR, "div[role='dialog']")
-                    )
+                    EC.invisibility_of_element_located((By.ID, "id_name"))
                 )
                 outcome = "success"
             except TimeoutException:
-                # Modal still visible -> read visible error text inside it
+                # Modal still visible -> read its error text from the
+                # specific dialog that still contains #id_name.
                 err_texts = driver.execute_script("""
+                    var nameInput = document.getElementById('id_name');
+                    if (!nameInput) return '';
+                    var modal = nameInput.closest('[role="dialog"]');
+                    if (!modal) return '';
                     var msgs = [];
-                    document.querySelectorAll(
-                        'div[role="dialog"] [id^="id_error_"], '
-                        + 'div[role="dialog"] .invalid-feedback, '
-                        + 'div[role="dialog"] .form-control-feedback'
+                    modal.querySelectorAll(
+                        '[id^="id_error_"], [id*="error_"], '
+                        + '.invalid-feedback, .form-control-feedback'
                     ).forEach(function(el) {
-                        var st = window.getComputedStyle(el);
-                        var visible = (st.display !== 'none')
-                                   && (st.visibility !== 'hidden')
-                                   && (el.offsetParent !== null);
                         var t = (el.innerText || el.textContent || '').trim();
-                        if (visible && t) msgs.push(t);
+                        if (t) msgs.push(t);
                     });
                     return msgs.join(' | ');
                 """)
