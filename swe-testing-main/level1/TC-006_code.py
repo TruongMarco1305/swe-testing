@@ -1,6 +1,6 @@
 """
 TC-006: Teacher Creates a Quiz
-Level-1 Selenium test – data-driven from test_data_tc006.csv
+Level-1 Selenium test – data-driven from TC-006_data.csv
 """
 
 import csv
@@ -24,7 +24,7 @@ QUIZ_URL   = (
     f"{BASE_URL}/course/modedit.php"
     f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
 )
-CSV_PATH   = os.path.join(os.path.dirname(__file__), "test_data_tc006.csv")
+CSV_PATH   = os.path.join(os.path.dirname(__file__), "TC-006_data.csv")
 
 
 def _load_csv():

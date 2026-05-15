@@ -37,7 +37,7 @@ ASSIGN_URL  = (
 ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
 ADMIN_PASS  = "Abcdxyz12@"
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc003.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-003_data.csv")
 
 
 # ---------------------------------------------------------------------------

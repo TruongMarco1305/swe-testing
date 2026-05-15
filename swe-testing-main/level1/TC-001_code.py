@@ -20,7 +20,7 @@ Data-driven approach (Level 1)
 --------------------------------
 The VARYING values across TC-001-001 … TC-001-010:
   username, password, email, expected_result
-are extracted into test_data_tc001.csv.
+are extracted into TC-001_data.csv.
 
 Everything else (firstname, lastname, locators, URLs) is hardcoded here.
 """
@@ -238,7 +238,8 @@ def _make_test(row: dict):
     return test_method
 
 
-_rows = load_csv("test_data_tc001.csv")
+import os as _os
+_rows = load_csv(_os.path.join(_os.path.dirname(__file__), "TC-001_data.csv"))
 for _row in _rows:
     _tc = _row["test_case_id"].replace("-", "_")
     setattr(TestAddUserLevel1, f"test_{_tc}", _make_test(_row))

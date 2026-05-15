@@ -11,5 +11,5 @@ pytest>=7.4                 # Test runner used in README §6
 
 # ── Non-functional tests (test_non_functional.py + 6 NFR files) ──────────
 locust>=2.20                # Performance load testing  (NFR-1 in NFR.md)
-python-owasp-zap-v2.4>=0.0.21  # Security scanning      (NFR-2 in NFR.md)
+requests>=2.31              # Security probes (passive HTTP audit) (NFR-2)
 axe-selenium-python>=2.1.6  # Accessibility auditing    (NFR-3 in NFR.md)

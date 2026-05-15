@@ -1,6 +1,6 @@
 """
 TC-005: Admin Creates a Calendar Event
-Level-1 Selenium test – data-driven from test_data_tc005.csv
+Level-1 Selenium test – data-driven from TC-005_data.csv
 """
 
 import csv
@@ -22,7 +22,7 @@ BASE_URL   = "https://xuansang1234.moodlecloud.com"
 ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
 ADMIN_PASS = "Abcdxyz12@"
 CAL_URL    = f"{BASE_URL}/calendar/view.php?view=month"
-CSV_PATH   = os.path.join(os.path.dirname(__file__), "test_data_tc005.csv")
+CSV_PATH   = os.path.join(os.path.dirname(__file__), "TC-005_data.csv")
 
 
 def _load_csv():

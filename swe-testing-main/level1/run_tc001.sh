@@ -25,7 +25,7 @@ run_nodes() {
   done
   echo "▶  Running: $filter"
   echo "────────────────────────────────────────"
-  python3 -m pytest test_add_user_level1.py -v -k "$filter"
+  python3 -m pytest TC-001_code.py -v -k "$filter"
 }
 
 # ── argument parsing ──────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ if [[ $# -eq 0 ]]; then
   echo "TC-001 test cases available:"
   python3 - <<'PY'
 import csv, pathlib
-rows = list(csv.DictReader(open("test_data_tc001.csv")))
+rows = list(csv.DictReader(open("TC-001_data.csv")))
 for r in rows:
     num = r["test_case_id"].split("-")[-1]
     print(f"  {num:>3}  username={r['username'] or '(empty)':30s}  expected={r['expected_result']}")
@@ -48,7 +48,7 @@ fi
 if [[ "$1" == "all" ]]; then
   echo "▶  Running ALL TC-001 tests"
   echo "────────────────────────────────────────"
-  python3 -m pytest test_add_user_level1.py -v
+  python3 -m pytest TC-001_code.py -v
   exit $?
 fi
 

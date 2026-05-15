@@ -18,7 +18,7 @@ verifyElementPresent css=X →  assertTrue(driver.find_elements(By.CSS_SELECTOR,
 Data-driven approach (Level 1)
 --------------------------------
 Varying values (fullname, shortname, end_date_enabled, end_date_offset_days,
-end_date_offset_years, numsections) are read from test_data_tc002.csv.
+end_date_offset_years, numsections) are read from TC-002_data.csv.
 
 All locators and the course creation URL are hardcoded here.
 
@@ -233,7 +233,7 @@ class TestCreateCourseLevel1(unittest.TestCase):
 
 # ── Dynamically generate one test method per CSV row ──────────────────────
 import os
-_CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc002.csv")
+_CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-002_data.csv")
 for _row in load_csv(_CSV_PATH):
     _method = TestCreateCourseLevel1._make_test(_row)
     setattr(TestCreateCourseLevel1, _method.__name__, _method)

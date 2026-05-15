@@ -247,12 +247,12 @@ class _BaseLevel2(unittest.TestCase):
 
 # ===========================================================================
 # TC-002  Admin Creates a New Course
-# CSV: test_data_tc002_level2.csv
+# CSV: TC-002_data.csv
 # ===========================================================================
 class TestCreateCourseLevel2(_BaseLevel2):
     """TC-002 — fully data-driven course creation tests."""
 
-    _CSV_FILE = "test_data_tc002_level2.csv"
+    _CSV_FILE = "TC-002_data.csv"
 
     def _fill_and_submit(self, row: dict):
         from datetime import date, timedelta
@@ -345,18 +345,18 @@ def _make_course_test(row: dict):
     return test_method
 
 
-for _r in load_csv("test_data_tc002_level2.csv"):
+for _r in load_csv("TC-002_data.csv"):
     setattr(TestCreateCourseLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_course_test(_r))
 
 
 # ===========================================================================
 # TC-003  Teacher Creates an Assignment
-# CSV: test_data_tc003_level2.csv
+# CSV: TC-003_data.csv
 # ===========================================================================
 class TestAssignLevel2(_BaseLevel2):
     """TC-003 — fully data-driven assignment creation tests."""
 
-    _CSV_FILE = "test_data_tc003_level2.csv"
+    _CSV_FILE = "TC-003_data.csv"
 
     @classmethod
     def setUpClass(cls):
@@ -489,13 +489,13 @@ def _make_assign_test(row: dict):
     return test_method
 
 
-for _r in load_csv("test_data_tc003_level2.csv"):
+for _r in load_csv("TC-003_data.csv"):
     setattr(TestAssignLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_assign_test(_r))
 
 
 # ===========================================================================
 # TC-004  Teacher Grades a Student Assignment
-# CSV: test_data_tc004_level2.csv
+# CSV: TC-004_data.csv
 # ===========================================================================
 _JS_SET_GRADE = """
 function nS(id, v) {
@@ -556,7 +556,7 @@ marker.setAttribute('data-error-msg', errMsg);
 class TestGradeLevel2(_BaseLevel2):
     """TC-004 — fully data-driven grade submission tests."""
 
-    _CSV_FILE = "test_data_tc004_level2.csv"
+    _CSV_FILE = "TC-004_data.csv"
 
     def _fill_and_submit(self, row: dict):
         driver, wait = self.driver, self.wait
@@ -597,18 +597,18 @@ def _make_grade_test(row: dict):
     return test_method
 
 
-for _r in load_csv("test_data_tc004_level2.csv"):
+for _r in load_csv("TC-004_data.csv"):
     setattr(TestGradeLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_grade_test(_r))
 
 
 # ===========================================================================
 # TC-005  Admin Creates a Calendar Event
-# CSV: test_data_tc005_level2.csv
+# CSV: TC-005_data.csv
 # ===========================================================================
 class TestCalendarEventLevel2(_BaseLevel2):
     """TC-005 — fully data-driven calendar event creation tests."""
 
-    _CSV_FILE = "test_data_tc005_level2.csv"
+    _CSV_FILE = "TC-005_data.csv"
 
 
 def _make_event_test(row: dict):
@@ -705,13 +705,13 @@ function setCheckbox(id,c){var e=document.getElementById(id);if(e&&e.checked!==c
     return test_method
 
 
-for _r in load_csv("test_data_tc005_level2.csv"):
+for _r in load_csv("TC-005_data.csv"):
     setattr(TestCalendarEventLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_event_test(_r))
 
 
 # ===========================================================================
 # TC-006  Teacher Sets Up a Quiz
-# CSV: test_data_tc006_level2.csv
+# CSV: TC-006_data.csv
 # ===========================================================================
 _JS_QUIZ_HELPERS = """
 function sS(id,v){var e=document.getElementById(id);if(e){e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));}}
@@ -724,7 +724,7 @@ function dis(id){var c=document.getElementById(id);if(c&&c.checked){c.click();}}
 class TestQuizSetupLevel2(_BaseLevel2):
     """TC-006 — fully data-driven quiz setup tests."""
 
-    _CSV_FILE = "test_data_tc006_level2.csv"
+    _CSV_FILE = "TC-006_data.csv"
 
     def _open_quiz_form(self, row: dict):
         self.driver.get(row["quiz_add_url"].strip())
@@ -807,18 +807,18 @@ def _make_quiz_test(row: dict):
     return test_method
 
 
-for _r in load_csv("test_data_tc006_level2.csv"):
+for _r in load_csv("TC-006_data.csv"):
     setattr(TestQuizSetupLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_quiz_test(_r))
 
 
 # ===========================================================================
 # TC-001  Admin Creates a New User
-# CSV: test_data_tc001_level2.csv
+# CSV: TC-001_data.csv
 # ===========================================================================
 class TestCreateUserLevel2(_BaseLevel2):
     """TC-001 — fully data-driven user creation tests."""
 
-    _CSV_FILE = "test_data_tc001_level2.csv"
+    _CSV_FILE = "TC-001_data.csv"
 
     @classmethod
     def _login(cls, row: dict):
@@ -936,7 +936,7 @@ def _make_user_test(row: dict):
     return test_method
 
 
-for _r in load_csv("test_data_tc001_level2.csv"):
+for _r in load_csv("TC-001_data.csv"):
     setattr(TestCreateUserLevel2, f"test_{_r['test_case_id'].replace('-','_')}", _make_user_test(_r))
 
 

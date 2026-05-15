@@ -111,7 +111,7 @@ _JS_CHECK_ERRORS = """
     marker.setAttribute('data-error-msg', errMsg);
 """
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc004.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-004_data.csv")
 
 
 # ---------------------------------------------------------------------------
