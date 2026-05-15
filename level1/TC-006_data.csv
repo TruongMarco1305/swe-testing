@@ -2,20 +2,20 @@ test_case_id,name,timeclose_enabled,close_offset_days,close_offset_years,timelim
 TC-006-001,qn001_QuizNom,yes,7,0,yes,30,5,success
 TC-006-002,qn005_QuizNom,yes,7,0,yes,30,9.99,success
 TC-006-003,qn006_QuizNom,yes,7,0,yes,30,10,success
-TC-006-004,qn007_QuizNom,yes,7,0,yes,30,10.01,fail
-TC-006-005,qn008_QuizNom,yes,7,0,yes,-1,5,fail
+TC-006-004,qn007_QuizNom,yes,7,0,yes,30,10.01,The grade to pass can not be greater than the maximum possible grade
+TC-006-005,qn008_QuizNom,yes,7,0,yes,-1,5,This duration cannot be negative.
 TC-006-006,qn009_QuizNom,yes,7,0,yes,0,5,success
 TC-006-007,qn010_QuizNom,yes,7,0,yes,1,5,success
 TC-006-008,qn011_QuizNom,yes,7,0,yes,998,5,success
 TC-006-009,qn012_QuizNom,yes,7,0,yes,999,5,success
 TC-006-010,qn013_QuizNom,yes,7,0,yes,1000,5,success
-TC-006-011,qn014_QuizNom,yes,-1,0,yes,30,5,fail
+TC-006-011,qn014_QuizNom,yes,-1,0,yes,30,5,The close date must be after the open date.
 TC-006-012,qn015_QuizNom,yes,0,0,yes,30,5,success
 TC-006-013,qn016_QuizNom,yes,1,0,yes,30,5,success
 TC-006-014,qn017_QuizNom,yes,0,10,yes,30,5,success
 TC-006-015,qn018_QuizNom,yes,0,11,yes,30,5,success
 TC-006-016,qn019_QuizNom,yes,0,12,yes,30,5,success
-TC-006-017,,yes,7,0,yes,30,5,fail
+TC-006-017,,yes,7,0,yes,30,5,You must supply a value here
 TC-006-018,qn021_QuizNom,yes,7,0,yes,30,5,success
 TC-006-019,qn022_QuizNom,yes,7,0,no,,5,success
 TC-006-020,qn023_QuizNom,no,,,yes,30,5,success
@@ -23,6 +23,6 @@ TC-006-021,qn024_QuizNom,yes,7,0,yes,30,5,success
 TC-006-022,qn025_QuizNom,no,,,no,,5,success
 TC-006-023,qn026_QuizNom,yes,7,0,yes,30,5,success
 TC-006-024,qn027_QuizNom,no,,,no,,5,success
-TC-006-025,qn028_QuizNom,yes,-1,0,yes,30,5,fail
-TC-006-026,qn029_QuizNom,yes,7,0,yes,30,10.01,fail
-TC-006-027,,yes,7,0,yes,30,5,fail
+TC-006-025,qn028_QuizNom,yes,-1,0,yes,30,5,The close date must be after the open date.
+TC-006-026,qn029_QuizNom,yes,7,0,yes,30,10.01,The grade to pass can not be greater than the maximum possible grade
+TC-006-027,,yes,7,0,yes,30,5,You must supply a value here

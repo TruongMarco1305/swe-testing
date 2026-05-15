@@ -1,6 +1,6 @@
 """
 TC-006: Teacher Creates a Quiz
-Level-1 Selenium test – data-driven from test_data_tc006.csv
+Level-1 Selenium test – data-driven from TC-006_data.csv
 """
 
 import csv
@@ -15,16 +15,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-BASE_URL   = "https://ihatetesting.moodlecloud.com"
-ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS = "Huuphuc0310@"
-COURSE_ID  = 152
-SECTION_ID = 750
+BASE_URL   = "https://xuansang1234.moodlecloud.com"
+ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS = "Abcdxyz12@"
+COURSE_ID  = 12
+SECTION_ID = 39
 QUIZ_URL   = (
     f"{BASE_URL}/course/modedit.php"
     f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
 )
-CSV_PATH   = os.path.join(os.path.dirname(__file__), "test_data_tc006.csv")
+CSV_PATH   = os.path.join(os.path.dirname(__file__), "TC-006_data.csv")
 
 
 def _load_csv():
@@ -124,9 +124,17 @@ sS('id_timelimit_timeunit','60');
         time.sleep(4)
 
         outcome = self._get_outcome(driver)
-        self.assertEqual(
-            outcome, expected,
-            f"{tc_id}: expected={expected}, got={outcome} | "
+        # Katalon verifyText: `verifyText | <text>` → assertIn(text, page_source).
+        # "success" + legacy fail_* tokens stay as exact-match outcome checks;
+        # any literal Moodle sentence is verified against the live page source.
+        e = expected.lower().strip()
+        if e in ("success", "fail_grade", "fail_time", "fail_date", "fail_name"):
+            matched = (outcome == expected)
+        else:
+            matched = self._verify_text(driver, expected)
+        self.assertTrue(
+            matched,
+            f"{tc_id}: verifyText FAILED — '{expected}' not in page (outcome='{outcome}') | "
             f"name={repr(name)} gradepass={gradepass} "
             f"timelimit_enabled={timelimit_enabled} timelimit_number={timelimit_number} "
             f"timeclose_enabled={timeclose_enabled} close_days={close_days} close_years={close_years}"
@@ -179,7 +187,7 @@ class TestQuizLevel1(unittest.TestCase):
         wait.until(EC.url_contains("/my/"))
         time.sleep(2)
 
-        # switch to Teacher role on course 152
+        # switch to Teacher role on course 12
         driver.get(
             f"{BASE_URL}/course/switchrole.php"
             f"?id={COURSE_ID}&switchrole=-1"
@@ -211,11 +219,22 @@ class TestQuizLevel1(unittest.TestCase):
 
     def _get_outcome(self, driver):
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        if errors:
-            return "fail"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
         if "Announcements" in driver.page_source:
             return "success"
         return "success"
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
 
 # ── attach test methods dynamically ──────────────────────────────────────────

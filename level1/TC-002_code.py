@@ -18,7 +18,7 @@ verifyElementPresent css=X →  assertTrue(driver.find_elements(By.CSS_SELECTOR,
 Data-driven approach (Level 1)
 --------------------------------
 Varying values (fullname, shortname, end_date_enabled, end_date_offset_days,
-end_date_offset_years, numsections) are read from test_data_tc002.csv.
+end_date_offset_years, numsections) are read from TC-002_data.csv.
 
 All locators and the course creation URL are hardcoded here.
 
@@ -44,12 +44,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ── Configuration (hardcoded — Level 1) ───────────────────────────────────
-BASE_URL        = "https://ihatetesting.moodlecloud.com/"
+BASE_URL        = "https://xuansang1234.moodlecloud.com/"
 LOGIN_URL       = BASE_URL + "login/index.php"
 NEW_COURSE_URL  = BASE_URL + "course/edit.php?category=0"
 
-ADMIN_USER  = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS  = "Huuphuc0310@"
+ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS  = "Abcdxyz12@"
 
 # Hardcoded locators (from krecorder)
 LOC_FULLNAME    = (By.ID, "id_fullname")
@@ -172,12 +172,25 @@ class TestCreateCourseLevel1(unittest.TestCase):
         time.sleep(4)
 
     def _get_outcome(self) -> str:
-        """Return 'success' if course was created, 'fail' if a validation error is shown."""
-        if self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
-            return "fail"
+        """Return 'success' or the concatenated visible error message(s)."""
+        errs = self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR)
+        if errs:
+            msgs = [(e.text or "").strip() for e in errs if (e.text or "").strip()]
+            if msgs:
+                return " | ".join(msgs)
         if SUCCESS_TEXT in self.driver.page_source:
             return "success"
-        return "fail"  # anything unexpected counts as fail
+        return "unknown"
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
     @staticmethod
     def _make_test(row: dict):
@@ -189,7 +202,7 @@ class TestCreateCourseLevel1(unittest.TestCase):
         offset_days  = int(row["end_date_offset_days"])
         offset_years = int(row["end_date_offset_years"])
         numsections  = int(row["numsections"])
-        expected     = row["expected_result"].strip().lower()
+        expected     = row["expected_result"].strip()
 
         def test_method(self):
             self._fill_and_submit(
@@ -198,9 +211,17 @@ class TestCreateCourseLevel1(unittest.TestCase):
                 numsections
             )
             actual = self._get_outcome()
-            self.assertEqual(
-                actual, expected,
-                f"[{tc_id}] Expected '{expected}' but got '{actual}'\n"
+            # "success" → form accepted (existing outcome detection);
+            # otherwise → Katalon verifyText against the live page source.
+            if expected.lower() == "success":
+                ok = (actual == "success")
+                fail_msg = f"[{tc_id}] Expected SUCCESS but got error: {actual}"
+            else:
+                ok = self._verify_text(self.driver, expected)
+                fail_msg = f"[{tc_id}] verifyText FAILED — '{expected}' not found in page (outcome={actual})"
+            self.assertTrue(
+                ok,
+                f"{fail_msg}\n"
                 f"  fullname={fullname!r}, shortname={shortname!r}, "
                 f"end_enabled={end_enabled}, offset_days={offset_days}, "
                 f"offset_years={offset_years}"
@@ -212,7 +233,7 @@ class TestCreateCourseLevel1(unittest.TestCase):
 
 # ── Dynamically generate one test method per CSV row ──────────────────────
 import os
-_CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc002.csv")
+_CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-002_data.csv")
 for _row in load_csv(_CSV_PATH):
     _method = TestCreateCourseLevel1._make_test(_row)
     setattr(TestCreateCourseLevel1, _method.__name__, _method)

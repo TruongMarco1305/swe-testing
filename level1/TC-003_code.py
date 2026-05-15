@@ -2,7 +2,7 @@
 TC-003 – Teacher Creates an Assignment (Level 1)
 =================================================
 Data-driven Selenium test: one unittest method per CSV row.
-Preparation: logs in as admin and switches role to Teacher on course 141.
+Preparation: logs in as admin and switches role to Teacher on course 10.
 Each test case navigates to the "Add Assignment" form, fills fields, submits,
 and asserts the expected outcome (success / fail).
 
@@ -28,16 +28,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-BASE_URL    = "https://ihatetesting.moodlecloud.com"
+BASE_URL    = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL   = f"{BASE_URL}/login/index.php"
 ASSIGN_URL  = (
     f"{BASE_URL}/course/modedit.php"
-    "?add=assign&type&course=141&sectionid=695&return=0&beforemod=0"
+    "?add=assign&type&course=10&sectionid=39&return=0&beforemod=0"
 )
-ADMIN_USER  = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS  = "Huuphuc0310@"
+ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS  = "Abcdxyz12@"
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc003.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-003_data.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class TestAssignLevel1(unittest.TestCase):
     # ------------------------------------------------------------------
     @classmethod
     def _login_and_switch_role(cls):
-        """Login as admin and switch role to Teacher on course 141."""
+        """Login as admin and switch role to Teacher on course 10."""
         driver = cls.driver
         driver.get(LOGIN_URL)
         driver.execute_script(
@@ -250,14 +250,25 @@ class TestAssignLevel1(unittest.TestCase):
         time.sleep(3)
 
     def _get_outcome(self):
-        """Return 'success' or 'fail' based on the current page."""
+        """Return 'success' or concatenated error message text(s)."""
         driver = self.driver
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        if errors:
-            return "fail"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
         if "Announcements" in driver.page_source:
             return "success"
-        return "fail"
+        return "unknown"
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
     # ------------------------------------------------------------------
     # Dynamic test generation
@@ -268,10 +279,14 @@ class TestAssignLevel1(unittest.TestCase):
             self._fill_and_submit(row)
             actual   = self._get_outcome()
             expected = row["expected_result"].strip()
-            self.assertEqual(
-                actual,
-                expected,
-                f"{row['test_case_id']}: expected '{expected}' but got '{actual}'"
+            # success → outcome marker; otherwise → Katalon verifyText
+            if expected.lower() == "success":
+                ok = (actual == "success")
+            else:
+                ok = self._verify_text(self.driver, expected)
+            self.assertTrue(
+                ok,
+                f"{row['test_case_id']}: verifyText FAILED — '{expected}' not in page (outcome='{actual}')"
                 f" (name='{row['name'][:30]}...', gradepass={row['gradepass']})",
             )
         test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"

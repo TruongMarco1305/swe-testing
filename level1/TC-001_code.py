@@ -20,7 +20,7 @@ Data-driven approach (Level 1)
 --------------------------------
 The VARYING values across TC-001-001 … TC-001-010:
   username, password, email, expected_result
-are extracted into test_data_tc001.csv.
+are extracted into TC-001_data.csv.
 
 Everything else (firstname, lastname, locators, URLs) is hardcoded here.
 """
@@ -37,12 +37,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ── Configuration (hardcoded — Level 1) ───────────────────────────────────
-BASE_URL    = "https://ihatetesting.moodlecloud.com/"
+BASE_URL    = "https://xuansang1234.moodlecloud.com/"
 LOGIN_URL   = BASE_URL + "login/index.php"
 ADD_USER_URL = BASE_URL + "user/editadvanced.php?id=-1"
 
-ADMIN_USER  = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS  = "Huuphuc0310@"
+ADMIN_USER  = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS  = "Abcdxyz12@"
 
 # Hardcoded locators (from krecorder)
 LOC_LOGIN_USERNAME = (By.ID, "username")
@@ -180,14 +180,36 @@ class TestAddUserLevel1(unittest.TestCase):
     # ── Helper: read actual outcome ───────────────────────────────────────
     def _get_outcome(self) -> str:
         """
-        success → "Changes saved" text present  (mirrors verifyTextPresent)
-        fail    → any [id^="id_error_"] element  (mirrors verifyElementPresent)
+        Return either "success" or the concatenated error message text(s)
+        rendered by Moodle. Empty string if neither marker is present.
         """
         if SUCCESS_TEXT in self.driver.page_source:
             return "success"
-        if self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
-            return "fail"
+        # Collect visible error message text from all id_error_* elements
+        msgs = []
+        for el in self.driver.find_elements(By.CSS_SELECTOR, FAIL_SELECTOR):
+            txt = (el.text or "").strip()
+            if txt:
+                msgs.append(txt)
+        if msgs:
+            return " | ".join(msgs)
         return "unknown"
+
+
+def _verify_text(driver, expected_text: str) -> bool:
+    """Katalon Recorder verifyText → Python Selenium.
+
+        verifyText | <text>   →   assertIn(<text>, driver.page_source)
+                                  (case-insensitive substring match)
+
+    Returns True iff expected_text appears anywhere in the rendered page
+    source. This is the literal translation of the Katalon `verifyText`
+    command and is what every non-success assertion in this file uses.
+    """
+    needle = (expected_text or "").lower().strip()
+    if not needle:
+        return False
+    return needle in driver.page_source.lower()
 
 
 # ── Factory: one test method per CSV row ──────────────────────────────────
@@ -195,19 +217,29 @@ def _make_test(row: dict):
     def test_method(self):
         self._fill_and_submit(row)
         actual   = self._get_outcome()
-        expected = row["expected_result"].strip().lower()
-        self.assertEqual(
-            actual, expected,
-            f"\n  [{row['test_case_id']}]"
+        expected = row["expected_result"].strip()
+        # "success" is a control token: the form must have been accepted —
+        # we rely on _get_outcome() which already checks SUCCESS_TEXT.
+        # Any other value is a Moodle error sentence → verifyText against
+        # the live page source (the Katalon-faithful path).
+        if expected.lower() == "success":
+            ok = (actual == "success")
+            label = f"Expected SUCCESS but got error: {actual}"
+        else:
+            ok = _verify_text(self.driver, expected)
+            label = f"verifyText FAILED — '{expected}' not in page (outcome={actual})"
+        self.assertTrue(
+            ok,
+            f"\n  [{row['test_case_id']}] {label}"
             f"\n  username = '{row['username']}'"
             f"\n  password = '{row['password'][:10]}…'"
             f"\n  email    = '{row['email']}'"
-            f"\n  Expected : {expected}  |  Actual : {actual}"
         )
     return test_method
 
 
-_rows = load_csv("test_data_tc001.csv")
+import os as _os
+_rows = load_csv(_os.path.join(_os.path.dirname(__file__), "TC-001_data.csv"))
 for _row in _rows:
     _tc = _row["test_case_id"].replace("-", "_")
     setattr(TestAddUserLevel1, f"test_{_tc}", _make_test(_row))

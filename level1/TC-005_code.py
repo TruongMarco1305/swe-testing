@@ -1,6 +1,6 @@
 """
 TC-005: Admin Creates a Calendar Event
-Level-1 Selenium test – data-driven from test_data_tc005.csv
+Level-1 Selenium test – data-driven from TC-005_data.csv
 """
 
 import csv
@@ -18,11 +18,11 @@ from selenium.common.exceptions import TimeoutException, InvalidSessionIdExcepti
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from webdriver_manager.chrome import ChromeDriverManager
 
-BASE_URL   = "https://ihatetesting.moodlecloud.com"
-ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS = "Huuphuc0310@"
+BASE_URL   = "https://xuansang1234.moodlecloud.com"
+ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS = "Abcdxyz12@"
 CAL_URL    = f"{BASE_URL}/calendar/view.php?view=month"
-CSV_PATH   = os.path.join(os.path.dirname(__file__), "test_data_tc005.csv")
+CSV_PATH   = os.path.join(os.path.dirname(__file__), "TC-005_data.csv")
 
 
 def _load_csv():
@@ -82,14 +82,22 @@ function setCheckbox(id,checked){
 }
 """
 
+        # Start time = NOW + 1 hour (gives Moodle a clean future-anchor that
+        # is independent of the modal's default 'no duration' state and that
+        # the 'until' field can always be placed after when offset >= 0).
+        # Do NOT touch id_timestart_minute=0 — that retroactively moves start
+        # backward, leaves the hidden until-field at the original 'now',
+        # and tricks Moodle's backend validator into reporting
+        # 'duration until is before the start time' for every minutes-mode
+        # submission regardless of the value entered.
         js_fill = js_helpers + f"\nnS('id_name',{repr(name)});\n"
         js_fill += """
-var tod=new Date();
+var tod=new Date(Date.now()+60*60*1000);
 sS('id_timestart_day',tod.getDate());
 sS('id_timestart_month',tod.getMonth()+1);
 sS('id_timestart_year',tod.getFullYear());
 sS('id_timestart_hour',tod.getHours());
-sS('id_timestart_minute',0);
+sS('id_timestart_minute',tod.getMinutes());
 """
 
         if duration_type == "none":
@@ -106,7 +114,7 @@ sS('id_timedurationuntil_day',until.getDate());
 sS('id_timedurationuntil_month',until.getMonth()+1);
 sS('id_timedurationuntil_year',until.getFullYear());
 sS('id_timedurationuntil_hour',until.getHours());
-sS('id_timedurationuntil_minute',0);
+sS('id_timedurationuntil_minute',until.getMinutes());
 """
 
         if repeat:
@@ -120,32 +128,58 @@ sS('id_timedurationuntil_minute',0);
             (By.XPATH, "//div[@role='dialog']//button[@data-action='save']")))
         driver.execute_script("arguments[0].click();", save_btn)
 
-        # ── determine outcome: did the modal close? ───────────────────────
-        # Success → modal disappears (Moodle accepted and reloaded calendar)
-        # Fail    → modal stays open (validation rejected the input)
+        # ── determine outcome: did the New-Event modal close? ─────────────
+        # Moodle's calendar page always has 3+ <div role="dialog"> elements
+        # (Notification window, modal templates) that ship with
+        # visibility:hidden. A bare `div[role="dialog"]` selector for the
+        # invisibility-wait therefore short-circuits to "success" on the
+        # first hidden dialog and masks every real validation failure.
+        # Instead, key off `#id_name` — the New-Event modal owns this input,
+        # and Moodle removes it from the DOM when the modal closes.
         try:
             try:
                 WebDriverWait(driver, 8).until(
-                    EC.invisibility_of_element_located(
-                        (By.CSS_SELECTOR, "div[role='dialog']")
-                    )
+                    EC.invisibility_of_element_located((By.ID, "id_name"))
                 )
                 outcome = "success"
             except TimeoutException:
-                outcome = "fail"
+                # Modal still visible -> read its error text from the
+                # specific dialog that still contains #id_name.
+                err_texts = driver.execute_script("""
+                    var nameInput = document.getElementById('id_name');
+                    if (!nameInput) return '';
+                    var modal = nameInput.closest('[role="dialog"]');
+                    if (!modal) return '';
+                    var msgs = [];
+                    modal.querySelectorAll(
+                        '[id^="id_error_"], [id*="error_"], '
+                        + '.invalid-feedback, .form-control-feedback'
+                    ).forEach(function(el) {
+                        var t = (el.innerText || el.textContent || '').trim();
+                        if (t) msgs.push(t);
+                    });
+                    return msgs.join(' | ');
+                """)
+                outcome = err_texts.strip() if err_texts else "fail"
         except InvalidSessionIdException:
-            # Browser crashed mid-test after clicking Save — Moodle accepted
-            # the input (page reloaded and tore down the session context).
-            # Recover: spin up a fresh driver so subsequent tests can continue.
             try:
                 self.__class__.driver.quit()
             except Exception:
                 pass
             self.__class__._new_driver()
             outcome = "success"
-        self.assertEqual(
-            outcome, expected,
-            f"{tc_id}: expected={expected}, got={outcome} | name={repr(name)} "
+
+        # Katalon verifyText: `verifyText | <text>` → assertIn(text, page_source).
+        # "success" stays as exact outcome marker; any literal sentence is
+        # verified against the live page source.
+        e = expected.lower().strip()
+        if e == "success":
+            matched = ((outcome or "").lower() == "success")
+        else:
+            matched = self._verify_text(driver, expected)
+        self.assertTrue(
+            matched,
+            f"{tc_id}: verifyText FAILED — '{expected}' not in page (outcome='{outcome}') | name={repr(name)} "
             f"duration_type={duration_type} minutes={minutes_val} until_offset={until_offset}"
         )
 
@@ -231,6 +265,17 @@ class TestCalendarEventLevel1(unittest.TestCase):
     def _get_outcome(self, driver):
         """Unused — outcome is now detected inline via explicit wait."""
         pass
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source — including
+        the open dialog/modal that contains the error message. Equivalent to:
+        `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
 
 # ── dynamically attach test methods ──────────────────────────────────────────

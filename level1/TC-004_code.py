@@ -4,7 +4,7 @@ TC-004 – Teacher Grades a Student Assignment (Level 1)
 Data-driven Selenium test: one unittest method per CSV row.
 Preparation: logs in as admin (full rights) on course 140.
 
-Each test navigates to the grader page (mod/assign id=321), fills the
+Each test navigates to the grader page (mod/assign id=41, userid=2), fills the
 grade field via React-compatible JS, submits "Save changes", then checks
 the custom __test_marker attribute injected by JS to determine success/fail.
 
@@ -31,11 +31,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-BASE_URL   = "https://ihatetesting.moodlecloud.com"
+BASE_URL   = "https://xuansang1234.moodlecloud.com"
 LOGIN_URL  = f"{BASE_URL}/login/index.php"
-GRADER_URL = f"{BASE_URL}/mod/assign/view.php?id=321&action=grader"
-ADMIN_USER = "phuc.nguyen0310@hcmut.edu.vn"
-ADMIN_PASS = "Huuphuc0310@"
+GRADER_URL = f"{BASE_URL}/mod/assign/view.php?id=41&action=grader&userid=2"
+ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
+ADMIN_PASS = "Abcdxyz12@"
 
 # JS: set grade using React-compatible native input setter + dispatch events
 _JS_SET_GRADE = """
@@ -81,19 +81,23 @@ _JS_SET_GRADE = """
     }
 """
 
-# JS: inject marker with error detection
+# JS: inject marker with error detection AND error-message capture
 _JS_CHECK_ERRORS = """
     var hasErr = false;
+    var errMsg = '';
     var sels = '[id^="id_error_"], .invalid-feedback, .form-control-feedback, '
              + '.error.felement, .help-block.text-danger';
     document.querySelectorAll(sels).forEach(function(el) {
-        if (hasErr) return;
         var st = window.getComputedStyle(el);
         var visible = (st.display !== 'none')
                    && (st.visibility !== 'hidden')
                    && (el.offsetParent !== null);
-        var hasText = (el.innerText || el.textContent || '').trim() !== '';
-        if (visible && hasText) hasErr = true;
+        var txt = (el.innerText || el.textContent || '').trim();
+        if (visible && txt) {
+            hasErr = true;
+            if (!errMsg) errMsg = txt;
+            else errMsg += ' | ' + txt;
+        }
     });
     var gi = document.getElementById('id_grade');
     if (gi && gi.classList.contains('is-invalid')) hasErr = true;
@@ -104,9 +108,10 @@ _JS_CHECK_ERRORS = """
         document.body.appendChild(marker);
     }
     marker.setAttribute('data-has-error', hasErr ? 'yes' : 'no');
+    marker.setAttribute('data-error-msg', errMsg);
 """
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "test_data_tc004.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-004_data.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -141,7 +146,7 @@ class TestGradeLevel1(unittest.TestCase):
             ADMIN_PASS,
         )
         time.sleep(3)
-        driver.get(f"{BASE_URL}/course/view.php?id=140")
+        driver.get(f"{BASE_URL}/course/view.php?id=10")
         time.sleep(2)
 
     # ------------------------------------------------------------------
@@ -176,7 +181,6 @@ class TestGradeLevel1(unittest.TestCase):
 
     def _get_outcome(self):
         driver = self.driver
-        # Check marker attribute
         markers_ok  = driver.find_elements(
             By.CSS_SELECTOR, '#__test_marker[data-has-error="no"]'
         )
@@ -186,10 +190,24 @@ class TestGradeLevel1(unittest.TestCase):
         if markers_ok:
             return "success"
         if markers_err:
-            return "fail"
-        # Fallback: any visible inline errors
+            msg = (markers_err[0].get_attribute("data-error-msg") or "").strip()
+            return msg if msg else "fail"
+        # Fallback: any visible inline error text
         errors = driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']")
-        return "fail" if errors else "success"
+        msgs = [(e.text or "").strip() for e in errors if (e.text or "").strip()]
+        if msgs:
+            return " | ".join(msgs)
+        return "success"
+
+    @staticmethod
+    def _verify_text(driver, expected_text: str) -> bool:
+        """Katalon Recorder verifyText: returns True iff expected_text appears
+        (case-insensitive substring) anywhere in driver.page_source.
+        Equivalent to: `verifyText | <text>` → `assertIn(text, page_source)`."""
+        needle = (expected_text or "").lower().strip()
+        if not needle:
+            return False
+        return needle in driver.page_source.lower()
 
     # ------------------------------------------------------------------
     # Dynamic test generation
@@ -200,10 +218,14 @@ class TestGradeLevel1(unittest.TestCase):
             self._fill_and_submit(row["grade"])
             actual   = self._get_outcome()
             expected = row["expected_result"].strip()
-            self.assertEqual(
-                actual,
-                expected,
-                f"{row['test_case_id']}: expected '{expected}' but got '{actual}'"
+            # success → outcome marker; otherwise → Katalon verifyText
+            if expected.lower() == "success":
+                ok = (actual == "success")
+            else:
+                ok = self._verify_text(self.driver, expected)
+            self.assertTrue(
+                ok,
+                f"{row['test_case_id']}: verifyText FAILED — '{expected}' not in page (outcome='{actual}')"
                 f" (grade='{row['grade']}')",
             )
         test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"

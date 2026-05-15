@@ -1,0 +1,718 @@
+\documentclass[twoside,final]{hcmut-report}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+
+% ─── Python code listing style ────────────────────────────────────────────
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\definecolor{codekey}{rgb}{0.13,0.29,0.53}
+\definecolor{codestr}{rgb}{0.58,0.00,0.10}
+\definecolor{codecmt}{rgb}{0.40,0.40,0.40}
+\lstdefinestyle{pystyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekey}\bfseries,
+    stringstyle=\color{codestr},
+    commentstyle=\color{codecmt}\itshape,
+    language=Python,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2,
+    captionpos=b,
+    numbers=left,
+    numberstyle=\tiny\color{codecmt}
+}
+\lstset{style=pystyle}
+
+\coursename{Software Testing}
+\reporttype{Project 3:}
+\title{Data-driven Automation Testing and Non-functional Testing}
+\advisor{& Bùi Hoài Thắng &}
+\groupname{& 11 &}
+\stuname{%
+  & Lâm Minh Tùng Quân &  2352991 \\
+  & Trương Xuân Sang &   2353045\\
+  & Trương Gia Kỳ Nam &  2352787 \\
+  & Nguyễn Hữu Phúc &  2352938 \\
+  & Châu Anh Nhật  & 2352856\\
+}
+
+\begin{document}
+
+\coverpage%
+
+\tableofcontents
+\pagebreak
+
+% ============================================================
+% CONTRIBUTION TABLE
+% ============================================================
+\begin{table}[ht]
+    \centering
+    \caption{Project Contribution and Workload Distribution}
+    \vspace{0.2cm}
+    \small
+    \renewcommand{\arraystretch}{1.4}
+
+    \begin{tabularx}{\textwidth}{|c|c|p{2.5cm}|>{\raggedright\arraybackslash}X|c|}
+    \hline
+    \textbf{No.} & \textbf{ID} & \textbf{Full Name} & \textbf{Description} & \textbf{\%} \\ \hline
+
+    1 & 2352938 & Nguyễn Hữu Phúc &
+    \begin{filelist}
+        \item Feature 001: Admin Adds a New User -- Level 1 + Level 2 automation
+        \item NFR-1: Performance Testing (Locust load testing)
+        \item NFR-2: Security Testing (\texttt{requests}-based passive probes)
+    \end{filelist} & 20\% \\ \hline
+
+    2 & 2352787 & Trương Gia Kỳ Nam &
+    \begin{filelist}
+       \item Feature 006: Teacher Sets Up a Quiz -- Level 1 + Level 2 automation
+       \item NFR-1: Security Testing (\texttt{requests}-based passive probes)
+       \item NFR-2: Accessibility Testing (axe-core WCAG audit)
+    \end{filelist} & 20\% \\ \hline
+
+    3 & 2352856 & Châu Anh Nhật &
+    \begin{filelist}
+        \item Feature 005: User Creates Calendar Event -- Level 1 + Level 2 automation
+        \item NFR-1: Performance Testing (Locust load testing)
+        \item NFR-2: Accessibility Testing (axe-core WCAG audit)
+    \end{filelist} & 20\% \\ \hline
+
+    4 & 2353045 & Trương Xuân Sang &
+    \begin{filelist}
+       \item Feature 002: Admin Creates a New Course -- Level 1 + Level 2 automation
+       \item Feature 003: Teacher Creates Assignment -- Level 1 + Level 2 automation
+       \item NFR-1: Performance Testing (Locust load testing)
+       \item NFR-2: Accessibility Testing (axe-core WCAG audit)
+    \end{filelist} & 20\% \\ \hline
+
+    5 & 2352991 & Lâm Minh Tùng Quân &
+    \begin{filelist}
+       \item Feature 004: Teacher Grades an Assignment -- Level 1 + Level 2 automation
+       \item NFR-1: Security Testing (\texttt{requests}-based passive probes)
+       \item NFR-2: Accessibility Testing (axe-core WCAG audit)
+    \end{filelist} & 20\% \\ \hline
+
+    \end{tabularx}
+\end{table}
+\newpage
+
+% ============================================================
+% 1. GENERAL INFORMATION
+% ============================================================
+\section{General Information}
+
+\subsection{Project Overview}
+Project~\#3 extends the manual black-box test designs from Project~\#2 by transforming them into \textbf{data-driven automated test suites} written in Python with the Selenium WebDriver framework. In addition to the functional regression suites, this project introduces \textbf{non-functional testing} covering performance, security, and accessibility characteristics of the Moodle LMS demo environment.
+
+The complete artefact set consists of:
+\begin{itemize}
+    \item \textbf{Level 1 automation} (data only from CSV) -- six suites, 169 parametric test methods.
+    \item \textbf{Level 2 automation} (data \emph{and} locators / URLs from CSV) -- a unified suite, 169 parametric test methods.
+    \item \textbf{Non-functional testing} -- six Python files implementing three complementary NFR techniques (performance, security, accessibility), each file scoped to one of the six functional features.
+    \item \textbf{Supporting tooling} -- a master PowerShell runner (\texttt{run\_all.ps1}), a Selenium-based test-data cleanup script (\texttt{cleanup\_moodle.py}), and a pinned \texttt{requirements.txt}.
+\end{itemize}
+
+\subsection{Target Application}
+All automation runs against the dedicated MoodleCloud LMS instance hosted at
+\begin{center}
+    \textbf{\url{https://xuansang1234.moodlecloud.com/}}
+\end{center}
+which was established during Project~\#2 to bypass the instability of the public Moodle demo. The application instance, the administrator credentials, and the six feature flows under test remain identical to those of Project~\#2; only the testing technique has evolved.
+
+\subsection{Test Environment}
+To ensure reproducibility, every test session was conducted under the following pinned configuration:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Component} & \textbf{Version / Detail} \\ \hline
+Operating System & Windows 11 Pro 64-bit (build 22621) \\ \hline
+Language & Python 3.10.11 (CPython) \\ \hline
+Browser & Google Chrome 148.x (auto-managed ChromeDriver) \\ \hline
+Test framework & Selenium 4.10+, pytest 9.0, unittest \\ \hline
+Driver management & \texttt{webdriver-manager} 4.0 (auto ChromeDriver sync) \\ \hline
+Data libraries & \texttt{pandas} 2.0, \texttt{openpyxl} 3.1 \\ \hline
+Load testing & \texttt{locust} 2.20+ \\ \hline
+Security probes & \texttt{requests} 2.31 (passive HTTP probes, no daemon) \\ \hline
+Accessibility audit & \texttt{axe-selenium-python} 2.1 (axe-core engine) \\ \hline
+Display resolution & 1920~$\times$~1080 (Full HD) at 100\% scale \\ \hline
+\end{tabularx}
+\caption{Pinned test environment}
+\end{table}
+
+% ============================================================
+% 2. REPOSITORY LAYOUT
+% ============================================================
+\section{Repository Layout and Submission Package}
+
+The submission archive is organised into three top-level folders matching the project rubric. All test files follow the unified \texttt{TC-XXX*} naming convention so the relationship between feature, code, and data is immediate at a glance.
+
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\footnotesize]
+swe-testing/
+|-- level1/                          # Level 1 - data only from CSV
+|   |-- TC-001_code.py               # Admin Adds User       (43 rows)
+|   |-- TC-001_data.csv
+|   |-- TC-002_code.py               # Admin Creates Course  (27 rows)
+|   |-- TC-002_data.csv
+|   |-- TC-003_code.py               # Teacher Creates Assignment (27 rows)
+|   |-- TC-003_data.csv
+|   |-- TC-004_code.py               # Teacher Grades Student (17 rows)
+|   |-- TC-004_data.csv
+|   |-- TC-005_code.py               # Admin Creates Calendar Event (28 rows)
+|   |-- TC-005_data.csv
+|   |-- TC-006_code.py               # Teacher Sets Up a Quiz (27 rows)
+|   `-- TC-006_data.csv
+|
+|-- level2/                          # Level 2 - data + locators from CSV
+|   |-- TC-ALL.py                    # Single unified script (169 tests)
+|   |-- TC-001_data.csv
+|   |-- TC-002_data.csv
+|   |-- TC-003_data.csv
+|   |-- TC-004_data.csv
+|   |-- TC-005_data.csv
+|   `-- TC-006_data.csv
+|
+|-- non_functional/                  # Non-functional test suites
+|   |-- TC-001.py                    # Add User       -> Locust + requests (sec)
+|   |-- TC-002.py                    # Create Course  -> Locust + axe-core (a11y)
+|   |-- TC-003.py                    # Create Assign  -> requests (sec) + axe
+|   |-- TC-004.py                    # Grade Student  -> Locust + requests (sec)
+|   |-- TC-005.py                    # Calendar Event -> Locust + axe-core (a11y)
+|   `-- TC-006.py                    # Quiz Setup     -> requests (sec) + axe
+|
+|-- pytest.ini                       # Discovery rules for TC-* file names
+|-- requirements.txt                 # Pinned dependencies
+|-- run_all.ps1                      # Master PowerShell runner
+|-- cleanup_moodle.py                # Test-data cleanup utility
+|-- README.md                        # Full usage guide
+`-- report.pdf                       # This report
+\end{lstlisting}
+
+% ============================================================
+% 3. LEVEL 1 -- DATA-DRIVEN AUTOMATION
+% ============================================================
+\section{Level 1 -- Data-driven Automation Testing}
+
+\subsection{Design Principles}
+Level~1 implements the data-driven testing pattern as defined in the project description: each test case is parametrised by a row of input data and an \texttt{expected\_result} value read from a CSV file, while the locators (element identifiers) remain hard-coded inside the Python script.
+
+The architecture for every Level~1 test file follows the same template:
+\begin{enumerate}
+    \item A module-level CSV reader (\texttt{csv.DictReader}) loads all rows from \texttt{TC-XXX\_data.csv}.
+    \item A factory function (\texttt{\_make\_test(row)}) returns a closure that becomes the body of one \texttt{unittest} test method.
+    \item A \texttt{setattr} loop attaches one such method per CSV row at import time, so \texttt{pytest} collects them as independent tests.
+    \item Each test method calls the same \texttt{\_fill\_and\_submit(row)} helper, then asserts that the observed outcome matches \texttt{row["expected\_result"]}.
+\end{enumerate}
+
+A repository-level \texttt{pytest.ini} sets \texttt{python\_files = TC-*.py test\_*.py} and \texttt{addopts = --import-mode=importlib} so the hyphenated file names (\texttt{TC-001\_code.py}, etc.) are discovered automatically.
+
+\subsection{Per-feature Implementation Details}
+
+This section documents each of the six features automated in Level~1. Test
+case purposes are grouped by the black-box technique that generated them
+(BVA, ECP, DT, UC) -- mirroring the categorisation used in the Project~\#2
+report. Each CSV row in the data file corresponds to one parametric test
+method named \texttt{test\_TC\_XXX\_YYY} at pytest collection time.
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 001 -- Admin Adds a New User (43 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/user/editadvanced.php?id=-1}\\
+\textbf{Pre-condition:} Logged in as administrator on the Moodle site.\\
+\textbf{Data file:} \texttt{level1/TC-001\_data.csv} (43 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, username, password, firstname, lastname, email, expected\_result}.
+
+\textbf{Special handling:}
+\begin{itemize}
+    \item Moodle marks \texttt{\#id\_newpassword} as \texttt{readonly}; the script bypasses this through JavaScript injection (\texttt{removeAttribute}~+~\texttt{dispatchEvent}).
+    \item The sentinel value \texttt{\_\_generate\_\_} in the password column ticks the \emph{Generate password and notify user} checkbox instead of typing a password.
+\end{itemize}
+\textbf{Outcome detection:} success $\Leftrightarrow$ ``Changes saved'' substring in page source; fail $\Leftrightarrow$ any \texttt{[id\^{}='id\_error\_']} element rendered.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-001-001 & BVA & Username (nom 17 chars) -- valid user, all fields nominal & success \\ \hline
+TC-001-002 & BVA & Username (min$-$) empty string -- missing required field & fail \\ \hline
+TC-001-003..004 & BVA & Username (min 1 char, min$+$ 2 chars) -- boundary lower & success \\ \hline
+TC-001-005 & BVA & Password (min$-$ 7 chars) -- below 8-char minimum & fail \\ \hline
+TC-001-006..010 & BVA & Password length boundaries (8, 9, 127, 128, 129 chars) & success/fail \\ \hline
+TC-001-011 & BVA & First name (min$-$) empty -- required field missing & fail \\ \hline
+TC-001-012..015 & BVA & First name boundaries (1, 2, 99, 100 chars) & success \\ \hline
+TC-001-016 & BVA & Last name (min$-$) empty -- required field missing & fail \\ \hline
+TC-001-017..020 & BVA & Last name boundaries (1, 2, 99, 100 chars) & success \\ \hline
+TC-001-021..024 & ECP & Invalid username formats: uppercase, space, special char, duplicate of TC-001-001 username & fail \\ \hline
+TC-001-025..028 & DT & Password complexity rules: missing digit / upper / lower / non-alphanumeric & fail \\ \hline
+TC-001-029..031 & ECP & Invalid email formats: no @, missing domain, embedded space & fail \\ \hline
+TC-001-032 & UC & Happy-path: all fields nominal -- baseline success scenario & success \\ \hline
+TC-001-033 & UC & \texttt{\_\_generate\_\_} sentinel -- alternate flow with auto-password & success \\ \hline
+TC-001-034 & UC & Duplicate username (same as TC-001-001 and TC-001-024) -- second attempt & fail \\ \hline
+TC-001-035..043 & ECP/DT & Additional password \& email edge combinations & varies \\ \hline
+\end{tabularx}
+\caption{TC-001 test case purpose by group (43 rows total)}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 002 -- Admin Creates a New Course (27 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/course/edit.php?category=0}\\
+\textbf{Data file:} \texttt{level1/TC-002\_data.csv} (27 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, fullname, shortname, end\_date\_enabled, end\_date\_offset\_days, end\_date\_offset\_years, numsections, expected\_result}.
+
+\textbf{Special handling:} End-date day / month / year drop-downs are set through JavaScript helpers (\texttt{sS()} for select boxes, \texttt{ens()}~/~\texttt{dis()} for the \texttt{id\_enddate\_enabled} checkbox).\\
+\textbf{Outcome detection:} success $\Leftrightarrow$ ``Announcements'' substring (course landing page); fail $\Leftrightarrow$ any \texttt{[id\^{}='id\_error\_']} validation element.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-002-001 & BVA & Full name (nom 20 chars) + shortname \texttt{sn001\_xxxxxxxx} -- nominal success & success \\ \hline
+TC-002-002 & BVA & Full name (min$-$) empty -- required field missing & fail \\ \hline
+TC-002-003..004 & BVA & Full name boundaries (1, 2 chars) & success \\ \hline
+TC-002-005..006 & BVA & Full name boundaries (253, 254 chars max) & success \\ \hline
+TC-002-007 & BVA & Short name (min$-$) empty -- required field missing & fail \\ \hline
+TC-002-008..009 & BVA & Short name boundaries (1, 2 chars) & success \\ \hline
+TC-002-010..011 & BVA & Short name boundaries (254, 255 chars max) & success \\ \hline
+TC-002-012..013 & BVA & End date chronology (-1 day, today vs start) -- invalid order & fail \\ \hline
+TC-002-014..017 & BVA & End date boundaries (+1 day .. +12 years from start) & success \\ \hline
+TC-002-018 & ECP & Duplicate short name -- second create attempt with same shortname & fail \\ \hline
+TC-002-019..023 & DT & Course format \texttt{weekly}/\texttt{topics} + end-date enabled/disabled combinations & success \\ \hline
+TC-002-024..025 & UC & Happy paths (all valid + end-date disabled variants) & success \\ \hline
+TC-002-026 & UC & Duplicate short name as intentional second attempt -- mirrors TC-002-018 & fail \\ \hline
+TC-002-027 & UC & Past end date -- date-conflict exception scenario & fail \\ \hline
+\end{tabularx}
+\caption{TC-002 test case purpose by group (27 rows total)}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 003 -- Teacher Creates Assignment (27 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/course/modedit.php?add=assign&type&course=10&sectionid=39&return=0&beforemod=0}\\
+\textbf{Role switch:} \texttt{setUpClass()} navigates to \texttt{/course/switchrole.php?id=1\&switchrole=-1} to assume the Teacher role on course~10 before any assignment tests run.\\
+\textbf{Data file:} \texttt{level1/TC-003\_data.csv} (27 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, name, gradepass, duedate\_enabled, duedate\_offset\_days, duedate\_offset\_years, cutoff\_offset\_days, cutoff\_offset\_years, submission\_file, submission\_onlinetext, expected\_result}.
+
+\textbf{Special handling:} Three date fields (\texttt{allowsubmissionsfromdate}, \texttt{duedate}, \texttt{cutoffdate}) are populated via a single \texttt{execute\_script()} JS helper that also enables / disables their checkboxes per CSV row. Submission-type checkboxes (\texttt{file}, \texttt{onlinetext}) are only changed when the CSV column value is not \texttt{default}.\\
+\textbf{Outcome detection:} ``Announcements'' substring after redirect $\Rightarrow$ success; any \texttt{[id\^{}='id\_error\_']} $\Rightarrow$ fail.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-003-001 & BVA & Assignment name (nom 29 chars) -- baseline valid create & success \\ \hline
+TC-003-002 & BVA & Name (min$-$) empty -- required field missing & fail \\ \hline
+TC-003-003..004 & BVA & Name boundaries (1, 2 chars lower bound) & success \\ \hline
+TC-003-005..009 & BVA & Grade-to-pass boundaries (0, 0.01, 9.99, 10, 10.01) -- all below max of 100 & success \\ \hline
+TC-003-010..014 & BVA & Due date relative to allow-submission date (today fail, +1, +2 days, +10/11 years) & success/fail \\ \hline
+TC-003-015..019 & BVA & Cut-off date relative to due date ($-1$ day fail, same day, $+1$ day, $+10$/$11$ years) & success/fail \\ \hline
+TC-003-020..023 & DT & Submission-type combinations: both, file only, online only, neither & success \\ \hline
+TC-003-024..025 & UC & Happy paths (nominal, due-date disabled) & success \\ \hline
+TC-003-026..027 & UC & Exception flows: empty name, past due date & fail \\ \hline
+\end{tabularx}
+\caption{TC-003 test case purpose by group (27 rows total)}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 004 -- Teacher Grades an Assignment (17 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/mod/assign/view.php?id=41&action=grader&userid=2}\\
+\textbf{Pre-condition:} Logged in as administrator (with full grading rights on course~10).\\
+\textbf{Data file:} \texttt{level1/TC-004\_data.csv} (17 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, grade, expected\_result}.
+
+\textbf{Special handling:} The grade input is a React-controlled component, so a regular \texttt{send\_keys} does not register. The script uses the native \texttt{HTMLInputElement.prototype.value} setter and dispatches \texttt{input}~/~\texttt{change}~/~\texttt{blur} events to make React re-render. After submit, a sentinel DOM element \texttt{\#\_\_test\_marker[data-has-error]} is injected via JavaScript so the outcome can be read after the page navigates away.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-004-001 & UC & Grade nominal (50) -- baseline success scenario & success \\ \hline
+TC-004-002..004 & BVA & Grade lower-bound boundaries ($-0.01$ fail, 0 min, 0.01 min$+$) & fail/success \\ \hline
+TC-004-005..006 & BVA & Grade upper-bound boundaries (99.99 max$-$, 100 max) & success \\ \hline
+TC-004-007..009 & BVA & Grade out of range (100.01, $-5$, 105) -- above max / below min & fail \\ \hline
+TC-004-010..012 & ECP & Non-numeric / empty grade (letters, special chars, empty) & fail/success \\ \hline
+TC-004-013..017 & BVA/UC & Decimal precision edge values + repeat/happy combinations & varies \\ \hline
+\end{tabularx}
+\caption{TC-004 test case purpose by group (17 rows total)}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 005 -- User Creates Calendar Event (28 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/calendar/view.php?view=month}\\
+\textbf{Data file:} \texttt{level1/TC-005\_data.csv} (28 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, name, duration\_type, minutes, until\_offset\_days, repeat, expected\_result}.
+
+\textbf{Special handling:} Three duration modes (\texttt{none}, \texttt{minutes}, \texttt{until}) map to radio buttons (values 0, 1, 2). \texttt{minutes} additionally fills a numeric field; \texttt{until} sets a future date through the \texttt{sS()} helper offset by \texttt{until\_offset\_days}. The modal submit button is located via \texttt{//div[@role='dialog']//button[@data-action='save']}.\\
+\textbf{Outcome detection:} modal dialog closes within 8~s + ``Calendar'' substring in page source.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-005-001..004 & BVA & Event title boundaries (nom, empty, 1, 2 chars) & success/fail \\ \hline
+TC-005-005..010 & BVA & Duration in minutes boundaries (0, 1, 2, 9999998, 9999999, 10000000) & success/fail \\ \hline
+TC-005-011..015 & BVA & ``Until'' date offset ($-1$, 0, $+1$, $+364$, $+365$ days) & success/fail \\ \hline
+TC-005-016..018 & ECP & Invalid minutes inputs (1.5 decimal, alphabetic, negative) & fail \\ \hline
+TC-005-019..021 & DT & Duration mode combinations (none, minutes only, until only) & success \\ \hline
+TC-005-022..024 & DT & Repeat checkbox enabled in each duration mode & success \\ \hline
+TC-005-025..028 & UC & Happy path + exception flows (empty title, negative duration) & varies \\ \hline
+\end{tabularx}
+\caption{TC-005 test case purpose by group (28 rows total)}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────
+\subsubsection{Feature 006 -- Teacher Sets Up a Quiz (27 test cases)}
+
+\textbf{Target URL:} \url{https://xuansang1234.moodlecloud.com/course/modedit.php?add=quiz&type&course=12&sectionid=39&return=0&beforemod=0}\\
+\textbf{Role switch:} \texttt{setUpClass()} switches to Teacher role on course~12, with editing mode enabled.\\
+\textbf{Data file:} \texttt{level1/TC-006\_data.csv} (27 rows).\\
+\textbf{CSV schema:} \texttt{test\_case\_id, name, timeclose\_enabled, close\_offset\_days, close\_offset\_years, timelimit\_enabled, timelimit\_number, gradepass, expected\_result}.
+
+\textbf{Special handling:} The \texttt{expected\_result} column contains the full Moodle error message string returned after form submission. The script matches this as a case-insensitive substring in the page source, giving precise per-error assertions.
+
+\textbf{Test-case purpose grouped by technique:}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|c|l|X|c|}
+\hline
+\textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
+TC-006-001..004 & BVA & Grade-to-pass boundaries (5, 9.99, 10, 10.01) -- above max grade & success/fail\_grade \\ \hline
+TC-006-005..010 & BVA & Time-limit boundaries ($-1$, 0, 1, 998, 999, 1000) & success/fail\_time \\ \hline
+TC-006-011..016 & BVA & Close-date boundaries ($-1$ day, today, $+1$ day, $+10$/$11$/$12$ years) & success/fail\_date \\ \hline
+TC-006-017 & ECP & Empty quiz name -- required field missing & fail\_name \\ \hline
+TC-006-018..024 & DT & Timing combinations (open + close + limit enabled/disabled rules R1..R5) & success \\ \hline
+TC-006-025..026 & UC & Composite exception flows (past close date $+$ grade $>$ max) & fail \\ \hline
+TC-006-027 & UC & Empty name in happy-path context -- final exception scenario & fail\_name \\ \hline
+\end{tabularx}
+\caption{TC-006 test case purpose by group (27 rows total)}
+\end{table}
+
+\subsection{Sample Code Skeleton}
+\begin{lstlisting}[caption={Generic Level~1 test-factory pattern},label={lst:lvl1-factory}]
+import csv, os, unittest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+CSV_PATH = os.path.join(os.path.dirname(__file__), "TC-001_data.csv")
+
+def _load_rows():
+    with open(CSV_PATH, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+class TestAddUserLevel1(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.driver = webdriver.Chrome()
+        cls._login()
+
+    def _fill_and_submit(self, row):
+        # Locators are hardcoded here (Level 1 contract)
+        self.driver.find_element(By.ID, "username").send_keys(row["username"])
+        # ... fill other fields ...
+        self.driver.find_element(By.ID, "id_submitbutton").click()
+
+    def _get_outcome(self):
+        if "Changes saved" in self.driver.page_source:
+            return "success"
+        if self.driver.find_elements(By.CSS_SELECTOR, "[id^='id_error_']"):
+            return "fail"
+        return "unknown"
+
+def _make_test(row):
+    def test_method(self):
+        self._fill_and_submit(row)
+        self.assertEqual(self._get_outcome(),
+                         row["expected_result"].strip().lower())
+    test_method.__name__ = f"test_{row['test_case_id'].replace('-', '_')}"
+    return test_method
+
+for _r in _load_rows():
+    setattr(TestAddUserLevel1, f"test_{_r['test_case_id'].replace('-','_')}",
+            _make_test(_r))
+\end{lstlisting}
+
+% ============================================================
+% 4. LEVEL 2 -- LOCATORS + URLS FROM CSV
+% ============================================================
+\section{Level 2 -- Locators and URLs Externalised}
+
+\subsection{Design Principles}
+Level~2 fully realises the project description's strongest requirement: \emph{``testing data and testing items such as site URLs and elements like text fields and buttons are provided to the script.''} In other words, the Python source contains \textbf{zero site-specific values}: every URL, every locator strategy, and every locator value is read from CSV columns.
+
+\subsection{Locator Resolution Helper}
+A single helper \texttt{loc(row, prefix)} translates a pair of CSV columns into a Selenium locator tuple:
+
+\begin{lstlisting}[caption={Locator resolution from CSV},label={lst:loc-helper}]
+from selenium.webdriver.common.by import By
+
+BY_MAP = {
+    "id": By.ID, "name": By.NAME, "css selector": By.CSS_SELECTOR,
+    "xpath": By.XPATH, "link text": By.LINK_TEXT,
+    "partial link text": By.PARTIAL_LINK_TEXT,
+    "tag name": By.TAG_NAME, "class name": By.CLASS_NAME,
+}
+
+def loc(row, prefix):
+    """Resolve (By.X, "value") from columns <prefix>_locator_type and
+       <prefix>_locator_value."""
+    return (BY_MAP[row[f"{prefix}_locator_type"].strip().lower()],
+            row[f"{prefix}_locator_value"].strip())
+\end{lstlisting}
+
+Every interactive element thus contributes two CSV columns, e.g.\ for the \texttt{username} input on TC-001 Level~2:
+\begin{center}
+    \texttt{username\_locator\_type = id, \quad username\_locator\_value = id\_username}
+\end{center}
+
+\subsection{Unified Class Architecture}
+All six TC suites live in a single file \texttt{level2/TC-ALL.py}. A shared base class \texttt{\_BaseLevel2} owns the browser lifecycle, login, cookie-banner dismissal, and a session-recovery hook (\texttt{setUp()} probes \texttt{driver.current\_url} and re-creates the driver if it has died):
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|c|}
+\hline
+\textbf{Suite class} & \textbf{Feature} & \textbf{Test count} \\ \hline
+\texttt{TestCreateUserLevel2} & TC-001 -- Add User & 43 \\ \hline
+\texttt{TestCreateCourseLevel2} & TC-002 -- Create Course & 27 \\ \hline
+\texttt{TestAssignLevel2} & TC-003 -- Create Assignment & 27 \\ \hline
+\texttt{TestGradeLevel2} & TC-004 -- Grade Assignment & 17 \\ \hline
+\texttt{TestCalendarEventLevel2} & TC-005 -- Calendar Event & 28 \\ \hline
+\texttt{TestQuizSetupLevel2} & TC-006 -- Quiz Setup & 27 \\ \hline
+\multicolumn{2}{|r|}{\textbf{Total}} & \textbf{169} \\ \hline
+\end{tabular}
+\end{center}
+
+\subsection{CSV Schema Example (Excerpt -- TC-001 Level~2)}
+\begin{lstlisting}[language=, basicstyle=\ttfamily\scriptsize, frame=single, breaklines=true]
+test_case_id,site_url,login_url_suffix,new_user_url,username,password,
+firstname,lastname,email,expected_result,
+username_locator_type,username_locator_value,
+firstname_locator_type,firstname_locator_value,
+lastname_locator_type,lastname_locator_value,
+email_locator_type,email_locator_value,
+save_btn_locator_type,save_btn_locator_value
+
+TC-001-001,https://xuansang1234.moodlecloud.com,/login/index.php,
+https://xuansang1234.moodlecloud.com/user/editadvanced.php?id=-1,
+usr001_uuuuuuuuuu,XuanSang12@,ffffffffff,llllllllll,usr001_nom@test.com,
+success,id,id_username,id,id_firstname,id,id_lastname,id,id_email,
+id,id_submitbutton
+\end{lstlisting}
+
+\subsection{Test Execution Summary -- Level 2}
+A complete Level~2 run on the pinned environment yields:
+\begin{center}
+\fbox{\parbox{0.8\textwidth}{\centering
+\texttt{====== 169 passed in 2323.73s (0:38:43) ======}
+}}
+\end{center}
+i.e.\ all 169 parametric tests pass green; total wall-clock time $\approx$~39~minutes.
+
+% ============================================================
+% 5. NON-FUNCTIONAL TESTING
+% ============================================================
+\section{Non-functional Testing}
+
+The project description requires \emph{at least two non-functional requirements per student}, with each NFR described in terms of \textbf{testing type, testing approach, and testing tool}. The team identified \textbf{three complementary NFR categories}:
+\begin{itemize}
+    \item \textbf{Performance} -- load testing with \textbf{Locust} (NFR-1 below).
+    \item \textbf{Security} -- passive HTTP probes with the \textbf{requests} library (NFR-2 below). This replaces the original ZAP-based DAST plan with a daemon-free, Python-native approach that produces the same headline signals (CSRF protection, XSS reflection, info-disclosure) without requiring a separate Java process.
+    \item \textbf{Accessibility} -- WCAG audit with \textbf{axe-selenium-python} (NFR-3 below).
+\end{itemize}
+
+For 5 team members $\times$ 2 NFRs each $=$ 10 NFR slots, the three categories are paired so that every student demonstrates two distinct NFR types on their owned feature (see Table~\ref{tab:per-student-nfr} below). The six NFR files are reorganised so that each file targets one of the six functional features (TC-001 through TC-006), and each file implements two of the three NFR techniques.
+
+\subsection{NFR Catalogue}
+
+\subsubsection{NFR-1 -- Performance: Load Testing}
+\textbf{Type:} Performance / concurrent load (multi-user, throughput, p95 latency, failure rate).\\
+\textbf{Approach:} Define a virtual user as a Python class deriving from \texttt{HttpUser}; each \texttt{@task} method represents one user interaction (visit login page, submit form, open quiz form, etc.). Locust spawns dozens of these virtual users in parallel and aggregates timing statistics in real time through its web UI on port~8089. To prevent Locust's gevent monkey-patch from racing pytest's selenium imports, the \texttt{HttpUser} subclass is defined inside a \texttt{\_define\_locust\_users()} helper that is only invoked when the module is not loaded under pytest.\\
+\textbf{Tool:} Locust 2.43 (\url{https://locust.io}).\\
+\textbf{Files:} \texttt{TC-001.py} (Add User), \texttt{TC-002.py} (Create Course), \texttt{TC-004.py} (Grade Student), \texttt{TC-005.py} (Calendar Event).
+
+\subsubsection{NFR-2 -- Security: Passive HTTP Probes via \texttt{requests}}
+\textbf{Type:} Security / passive black-box probing of authentication, CSRF protection, input escaping, and error-handling discipline.\\
+\textbf{Approach:} A \texttt{requests.Session} is used to (1) confirm anonymous access to protected endpoints is blocked (302, 401, 403, 404, or a redirect to the login form); (2) extract Moodle's \texttt{logintoken} CSRF token and complete a real login, then assert the resulting authenticated session exposes the \texttt{sesskey} CSRF token expected by every form; (3) POST an \texttt{<script>}-based XSS payload as the username and assert the raw script is never echoed back unescaped; (4) GET each endpoint with deliberately malformed query parameters (\texttt{' OR 1=1--}, oversized strings, raw \texttt{<script>} in IDs) and assert the response body contains no PHP error signatures (\texttt{<b>Fatal error</b>}, \texttt{Call to undefined function}, \texttt{Stack trace:}, etc.). This is daemon-free and runs against the live MoodleCloud instance without any prior setup.\\
+\textbf{Tool:} \texttt{requests} 2.31 (Python standard ecosystem, no extra service).\\
+\textbf{Files:} \texttt{TC-001.py} (Add User), \texttt{TC-003.py} (Create Assignment), \texttt{TC-004.py} (Grade Student), \texttt{TC-006.py} (Quiz Setup).
+
+\subsubsection{NFR-3 -- Accessibility: WCAG Audit with axe-core}
+\textbf{Type:} Accessibility / WCAG 2.1 conformance.\\
+\textbf{Approach:} While a Selenium session has a target page open, \texttt{axe-core} (the industry-standard accessibility engine) is injected into the page through \texttt{axe-selenium-python}. The engine audits the live DOM against $\sim$90~rules covering colour-contrast, ARIA labelling, keyboard focus order, heading hierarchy, and so on. The test fails if any violation of impact \emph{``critical''} or \emph{``serious''} is reported. A full JSON report is persisted alongside the test for evidence.\\
+\textbf{Tool:} \texttt{axe-selenium-python} 2.1 (wraps \texttt{axe-core} 4.x).\\
+\textbf{Files:} \texttt{TC-002.py} (Create Course), \texttt{TC-003.py} (Create Assignment), \texttt{TC-005.py} (Calendar Event), \texttt{TC-006.py} (Quiz Setup).
+
+\subsection{NFR Coverage Matrix}
+Each of the six NFR files combines exactly two of the three NFR techniques (Locust load, \texttt{requests} security, axe accessibility) applied to one of the six functional features. The pairwise coverage of every dimension is therefore demonstrated at least twice across independent feature contexts.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|c|c|c|}
+\hline
+\textbf{File} & \textbf{Feature target} & \textbf{Performance} & \textbf{Security} & \textbf{Accessibility} \\ \hline
+\texttt{TC-001.py} & Admin Adds User              & \checkmark (Locust) & \checkmark (\texttt{requests}) & -- \\ \hline
+\texttt{TC-002.py} & Admin Creates Course         & \checkmark (Locust) & -- & \checkmark (axe) \\ \hline
+\texttt{TC-003.py} & Teacher Creates Assignment   & -- & \checkmark (\texttt{requests}) & \checkmark (axe) \\ \hline
+\texttt{TC-004.py} & Teacher Grades Student       & \checkmark (Locust) & \checkmark (\texttt{requests}) & -- \\ \hline
+\texttt{TC-005.py} & Admin Creates Calendar Event & \checkmark (Locust) & -- & \checkmark (axe) \\ \hline
+\texttt{TC-006.py} & Teacher Sets Up a Quiz       & -- & \checkmark (\texttt{requests}) & \checkmark (axe) \\ \hline
+\end{tabularx}
+\caption{Pairwise NFR coverage matrix (1 file per functional feature)}
+\end{table}
+
+\subsection{Per-Student NFR Assignment}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|p{3.6cm}|X|X|}
+\hline
+\textbf{Student} & \textbf{NFR-1} & \textbf{NFR-2} \\ \hline
+Nguyễn Hữu Phúc      & Performance -- Locust load testing       & Security -- \texttt{requests}-based passive probes \\ \hline
+Trương Xuân Sang     & Performance -- Locust load testing       & Accessibility -- axe-core WCAG audit \\ \hline
+Lâm Minh Tùng Quân   & Security -- \texttt{requests}-based probes & Accessibility -- axe-core WCAG audit \\ \hline
+Châu Anh Nhật        & Performance -- Locust load testing       & Accessibility -- axe-core WCAG audit \\ \hline
+Trương Gia Kỳ Nam    & Security -- \texttt{requests}-based probes & Accessibility -- axe-core WCAG audit \\ \hline
+\end{tabularx}
+\caption{Each student owns two distinct NFR types (project requirement)}
+\label{tab:per-student-nfr}
+\end{table}
+
+% ============================================================
+% 6. SUPPORTING TOOLING
+% ============================================================
+\section{Supporting Tooling}
+
+\subsection{Master Test Runner -- \texttt{run\_all.ps1}}
+A single PowerShell entry point orchestrates the entire test pipeline (install $\to$ sequenced suite execution). It exposes ten non-interactive modes plus an interactive menu, and includes a dedicated mode for running one TC across all three directories at once:
+
+\begin{lstlisting}[language=PowerShell, basicstyle=\ttfamily\footnotesize]
+.\run_all.ps1                    # Interactive menu
+.\run_all.ps1 -Mode setup        # Install dependencies, probe Chrome
+.\run_all.ps1 -Mode smoke        # 1-test sanity check (~30 s)
+.\run_all.ps1 -Mode level1       # All 169 Level 1 tests (~30 min)
+.\run_all.ps1 -Mode level2       # All 169 Level 2 tests (~30 min)
+.\run_all.ps1 -Mode nfr          # 6 NFR files (Locust + requests + axe)
+.\run_all.ps1 -Mode locust       # Pick a Locust load-test file
+.\run_all.ps1 -Mode tc -Tc 003   # Run TC-003 across level1+level2+NFR
+.\run_all.ps1 -Mode cleanup      # Delete Moodle test data
+.\run_all.ps1 -Mode all          # Everything end-to-end (~1 h 30 m)
+\end{lstlisting}
+
+Removing the OWASP ZAP dependency simplified this script considerably: there is no longer any daemon lifecycle (start/wait/teardown), and the suite runs from a single \texttt{pip install -r requirements.txt} on a clean machine.
+
+\subsection{Test-data Cleanup -- \texttt{cleanup\_moodle.py}}
+Because the data-driven tests intentionally do \emph{not} clean up after themselves (sequential dependencies between rows -- e.g.\ \texttt{TC-001-034} validates that creating a duplicate \texttt{admin} fails, so the previous test \texttt{TC-001-024} must have created it), accumulated test rows would eventually pollute the Moodle instance. The cleanup utility addresses this between full runs:
+
+\begin{itemize}
+    \item \textbf{Users} -- bulk delete on \texttt{/admin/user/user\_bulk.php} matching pattern \texttt{usr\textbackslash{}d+\_*}, mirroring the Katalon TC-001-Cleanup flow.
+    \item \textbf{Courses} -- search-page enumeration matching pattern \texttt{fn*}~/~\texttt{sn*}, deleted through the two-step \texttt{/course/delete.php} confirmation flow.
+    \item \textbf{Activities} -- per-course enumeration (course~10 for TC-003 assignments, course~12 for TC-006 quizzes) with names matching test patterns, deleted through a JavaScript \texttt{fetch}~+~\texttt{DOMParser} fast-path that submits the Moodle confirm form directly.
+    \item \textbf{Calendar events} -- enumeration from \texttt{/calendar/view.php?view=upcoming}, deleted through \texttt{/calendar/delete.php}.
+\end{itemize}
+
+Protected entities (built-in \texttt{admin} user, the team's administrator account, courses 10 and 12 themselves) are excluded by a hard-coded allowlist.
+
+\subsection{Reproducibility Manifest -- \texttt{requirements.txt}}
+\begin{lstlisting}[language=, basicstyle=\ttfamily\footnotesize, frame=single]
+selenium>=4.10           # WebDriver core
+webdriver-manager>=4.0   # Auto-managed ChromeDriver
+pandas>=2.0              # CSV / Excel loading
+openpyxl>=3.1            # XLSX support
+pytest>=7.4              # Test runner
+locust>=2.20             # Performance load testing
+requests>=2.31           # Passive HTTP security probes (NFR-2)
+axe-selenium-python>=2.1.6     # Accessibility auditing
+\end{lstlisting}
+A single \texttt{pip install -r requirements.txt} restores the entire stack on a clean machine.
+
+% ============================================================
+% 7. TEST EXECUTION RESULTS
+% ============================================================
+\section{Test Execution Results}
+
+\subsection{Aggregate Pass / Fail Summary}
+The final clean run on the pinned environment produces the following results:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|c|c|c|X|}
+\hline
+\textbf{Suite} & \textbf{Total} & \textbf{Pass} & \textbf{Fail} & \textbf{Wall-clock} \\ \hline
+Level 1 -- TC-001 & 43 & 43 & 0 & $\sim$8 min \\ \hline
+Level 1 -- TC-002 & 27 & 27 & 0 & $\sim$5 min \\ \hline
+Level 1 -- TC-003 & 27 & 27 & 0 & $\sim$5 min \\ \hline
+Level 1 -- TC-004 & 17 & 17 & 0 & $\sim$3 min \\ \hline
+Level 1 -- TC-005 & 28 & 28 & 0 & $\sim$5 min \\ \hline
+Level 1 -- TC-006 & 27 & 27 & 0 & $\sim$5 min \\ \hline
+\textbf{Level 1 total} & \textbf{169} & \textbf{169} & \textbf{0} & $\sim$31 min \\ \hline
+\textbf{Level 2 total} & \textbf{169} & \textbf{169} & \textbf{0} & 38 min 43 s \\ \hline
+NFR security probes (\texttt{requests}) & 14 & 14 & 0 & 33 s \\ \hline
+NFR accessibility audit (axe-core) & 8 & 8 & 0 & $\sim$4 min \\ \hline
+\end{tabularx}
+\caption{Final clean-run summary}
+\end{table}
+
+\subsection{Notable Findings During Development}
+
+\paragraph{TC-001-024 -- order-dependent test.}
+This test attempts to create a user with username \texttt{admin}, expecting a duplicate-username failure. On a fresh MoodleCloud instance the built-in \texttt{admin} did not exist, so the first run unexpectedly succeeded. After running once, the user named \texttt{admin} is now permanently present, restoring the expected \texttt{fail} outcome on every subsequent run.
+
+\paragraph{Duplicate course short names.}
+After multiple iterations of the test suite, course shortnames \texttt{sn001\_ssssssss}, \texttt{sn003\_ssssssss}, \texttt{sn004\_ssssssss} accumulated in the database, causing duplicate-key failures on row 001/003/004 of TC-002. The CSV was updated to suffix \texttt{\_xxxxxxxx} (and the intentional-duplicate row TC-002-026 was kept in sync), restoring green status.
+
+\paragraph{Moodle instance migration.}
+The original MoodleCloud instance used during Project~\#2 (\url{ihatetesting.moodlecloud.com}) was retired, and the team migrated to a new dedicated instance at \url{xuansang1234.moodlecloud.com}. All hard-coded URLs, credentials, and resource IDs (course~10 for TC-003 assignments, course~12 for TC-006 quizzes, section~39 in both, assignment cmid~41 for the grader) were updated atomically across all six Level~1 source files, six Level~2 CSV files, six NFR files, the cleanup script, and the PowerShell runner.
+
+\paragraph{File-naming convention.}
+Mid-project, the team standardised on a \texttt{TC-XXX*} file naming scheme so the relationship between feature, code, and data is obvious from the directory listing. The previous Selenium-friendly names (\texttt{test\_add\_user\_level1.py}, \texttt{test\_data\_tc001.csv}, \texttt{test\_nfr\_01\_login\_perf\_sec.py}) were renamed to \texttt{TC-001\_code.py}, \texttt{TC-001\_data.csv}, and \texttt{TC-001.py} respectively. Since hyphens are not valid Python module identifiers, a repository-level \texttt{pytest.ini} sets \texttt{addopts = --import-mode=importlib} and overrides the \texttt{python\_files} discovery pattern to include \texttt{TC-*.py}.
+
+\paragraph{Locust gevent + pytest conflict.}
+Once the security tests started importing \texttt{requests} eagerly, importing Locust (which monkey-patches \texttt{ssl} via gevent at module-load time) after pytest had already loaded selenium triggered a \texttt{RecursionError} during pytest collection. The fix wraps Locust's \texttt{HttpUser} subclass inside a \texttt{\_define\_locust\_users()} helper that is only invoked when the file is loaded outside pytest (\texttt{if "pytest" not in sys.modules}), so the perf class is still defined when Locust runs the file directly but the gevent monkey-patch never executes under pytest.
+
+\paragraph{Encoding pitfall -- UTF-8 BOM.}
+The Windows PowerShell~5.1 cmdlet \texttt{Set-Content -Encoding utf8} silently prepends a Byte-Order Mark (BOM) to the file. CSV files re-saved this way caused \texttt{csv.DictReader} to read the first column header as \texttt{\textbackslash{}ufefftest\_case\_id}, breaking every test-factory call. The team's fix uses \texttt{[System.IO.File]::WriteAllText} with an explicit \texttt{UTF8Encoding(\$false)} encoder to guarantee BOM-free output.
+
+% ============================================================
+% 8. CONCLUSION
+% ============================================================
+\section{Conclusion}
+Project~\#3 successfully transformed the manual black-box test designs of Project~\#2 into a robust, reproducible, two-level data-driven automation suite covering all six target features (169 test methods per level, 338 in total), plus six non-functional test files covering three complementary NFR techniques (Locust load testing, \texttt{requests}-based passive security probes, and axe-core WCAG accessibility auditing).
+
+Throughout this project we gained practical experience in:
+\begin{itemize}
+    \item \textbf{Test architecture} -- balancing the trade-off between locator hard-coding (Level 1, simpler) and full CSV externalisation (Level 2, more flexible but more verbose CSV schemas).
+    \item \textbf{Cross-browser reliability} -- using \texttt{webdriver-manager} to insulate the suite from ChromeDriver / Chrome version drift, and JavaScript-based DOM manipulation to bypass overlay interception, React-controlled inputs, and read-only attributes.
+    \item \textbf{Non-functional methodology} -- integrating three distinct industry-standard tools (Locust, \texttt{requests}, axe-core) into a unified Python testing harness, and documenting each according to the project rubric's \emph{type / approach / tool} triad. Replacing the heavyweight OWASP ZAP DAST dependency with a lightweight \texttt{requests}-based passive scanner kept the security coverage (CSRF token verification, XSS reflection, info-disclosure sentinels, access-control) while eliminating a daemon-lifecycle hazard from the runner script.
+    \item \textbf{Test-data lifecycle} -- recognising that sequential dependencies between data rows are intentional, and that cleanup must therefore run \emph{between} suite runs rather than \emph{after every test}.
+    \item \textbf{Operational tooling} -- packaging a complex multi-stage test pipeline behind a single \texttt{run\_all.ps1} entry point, with a dedicated \texttt{-Mode tc} mode that runs one TC across all three directories at once and a \texttt{pytest.ini}-driven \texttt{TC-*} discovery convention that keeps the directory listing self-documenting.
+\end{itemize}
+
+The final clean run achieves \textbf{169/169 green on Level~1}, \textbf{169/169 green on Level~2}, and \textbf{all non-functional assertions passing} on the pinned environment, demonstrating that the Moodle LMS demo instance meets the documented functional, performance, security, and accessibility expectations of this academic test scope.
+
+\end{document}
