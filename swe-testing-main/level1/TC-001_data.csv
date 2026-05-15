@@ -32,12 +32,12 @@ TC-001-030,usr035_usr,XuanSang12@,ffffffffff,llllllllll,test@,Invalid email addr
 TC-001-031,usr036_usr,XuanSang12@,ffffffffff,llllllllll,"te st@ex.com",Invalid email address
 TC-001-032,usr037_usr,XuanSang12@,ffffffffff,llllllllll,usr037_nom@test.com,success
 TC-001-033,usr038_usr,__generate__,ffffffffff,llllllllll,usr038_nom@test.com,success
-TC-001-034,admin,XuanSang12@,ffffffffff,llllllllll,usr039_nom@test.com,This username already exists
+TC-001-034,usr001_uuuuuuuuuu,XuanSang12@,ffffffffff,llllllllll,usr039_nom@test.com,This username already exists
 TC-001-035,usr040_usr,invalid,ffffffffff,llllllllll,usr040_nom@test.com,Passwords must be at least 8 characters long
 TC-001-036,usr041_usr,XuanSang12@,ffffffffff,llllllllll,invalid,Invalid email address
 TC-001-037,usr042_usr,XuanSang12@,,llllllllll,usr042_nom@test.com,Missing given name
 TC-001-038,usr043_usr,XuanSang12@,ffffffffff,llllllllll,usr043_nom@test.com,success
-TC-001-039,usr044_usr,Abcdefg1,ffffffffff,llllllllll,usr044_nom@test.com,Password must have at least 10 characters
+TC-001-039,usr044_usr,Abcdefg1,ffffffffff,llllllllll,usr044_nom@test.com,Passwords must be at least 8 characters long
 TC-001-040,usr045_usr,ABCDEFG1!,ffffffffff,llllllllll,usr045_nom@test.com,Passwords must have at least 1 lower case
 TC-001-041,usr046_usr,abcdefg1!,ffffffffff,llllllllll,usr046_nom@test.com,Passwords must have at least 1 upper case
 TC-001-042,usr047_usr,Abcdefgh!,ffffffffff,llllllllll,usr047_nom@test.com,Passwords must have at least 1 digit

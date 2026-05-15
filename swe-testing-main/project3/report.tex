@@ -251,12 +251,12 @@ TC-001-011 & BVA & First name (min$-$) empty -- required field missing & fail \\
 TC-001-012..015 & BVA & First name boundaries (1, 2, 99, 100 chars) & success \\ \hline
 TC-001-016 & BVA & Last name (min$-$) empty -- required field missing & fail \\ \hline
 TC-001-017..020 & BVA & Last name boundaries (1, 2, 99, 100 chars) & success \\ \hline
-TC-001-021..024 & ECP & Invalid username formats: uppercase, space, special char, ``admin'' (duplicate) & fail \\ \hline
+TC-001-021..024 & ECP & Invalid username formats: uppercase, space, special char, duplicate of TC-001-001 username & fail \\ \hline
 TC-001-025..028 & DT & Password complexity rules: missing digit / upper / lower / non-alphanumeric & fail \\ \hline
 TC-001-029..031 & ECP & Invalid email formats: no @, missing domain, embedded space & fail \\ \hline
 TC-001-032 & UC & Happy-path: all fields nominal -- baseline success scenario & success \\ \hline
 TC-001-033 & UC & \texttt{\_\_generate\_\_} sentinel -- alternate flow with auto-password & success \\ \hline
-TC-001-034 & UC & Duplicate username ``admin'' -- second create attempt after TC-001-024 & fail \\ \hline
+TC-001-034 & UC & Duplicate username (same as TC-001-001 and TC-001-024) -- second attempt & fail \\ \hline
 TC-001-035..043 & ECP/DT & Additional password \& email edge combinations & varies \\ \hline
 \end{tabularx}
 \caption{TC-001 test case purpose by group (43 rows total)}
@@ -318,11 +318,12 @@ TC-002-027 & UC & Past end date -- date-conflict exception scenario & fail \\ \h
 TC-003-001 & BVA & Assignment name (nom 29 chars) -- baseline valid create & success \\ \hline
 TC-003-002 & BVA & Name (min$-$) empty -- required field missing & fail \\ \hline
 TC-003-003..004 & BVA & Name boundaries (1, 2 chars lower bound) & success \\ \hline
-TC-003-005..010 & BVA & Grade-to-pass boundaries (0, 0.01, 9.99, 10, 10.01, negative) & success/fail \\ \hline
-TC-003-011..016 & BVA & Due date relative to allow-submission date (today, past, future, +10/11/12y) & success/fail \\ \hline
-TC-003-017..022 & BVA & Cut-off date relative to due date (-1 day, due, due+1, due+10y, ..) & success/fail \\ \hline
-TC-003-023..025 & DT & Submission-type combinations: file only, online only, both, neither & success \\ \hline
-TC-003-026..027 & UC & Happy path + empty-name exception scenario & success/fail \\ \hline
+TC-003-005..009 & BVA & Grade-to-pass boundaries (0, 0.01, 9.99, 10, 10.01) -- all below max of 100 & success \\ \hline
+TC-003-010..014 & BVA & Due date relative to allow-submission date (today fail, +1, +2 days, +10/11 years) & success/fail \\ \hline
+TC-003-015..019 & BVA & Cut-off date relative to due date ($-1$ day fail, same day, $+1$ day, $+10$/$11$ years) & success/fail \\ \hline
+TC-003-020..023 & DT & Submission-type combinations: both, file only, online only, neither & success \\ \hline
+TC-003-024..025 & UC & Happy paths (nominal, due-date disabled) & success \\ \hline
+TC-003-026..027 & UC & Exception flows: empty name, past due date & fail \\ \hline
 \end{tabularx}
 \caption{TC-003 test case purpose by group (27 rows total)}
 \end{table}
@@ -344,10 +345,12 @@ TC-003-026..027 & UC & Happy path + empty-name exception scenario & success/fail
 \begin{tabularx}{\textwidth}{|c|l|X|c|}
 \hline
 \textbf{TC range} & \textbf{Method} & \textbf{Boundary / scenario tested} & \textbf{Exp.} \\ \hline
-TC-004-001..004 & BVA & Grade boundaries lower-bound (0, 0.01, 99.99, 100) & success \\ \hline
-TC-004-005..006 & BVA & Grade out of range ($-1$, $100.01$) -- below min / above max & fail \\ \hline
-TC-004-007..010 & ECP & Non-numeric grades: letters, special chars, empty (feedback only) & fail/success \\ \hline
-TC-004-011..017 & BVA/UC & Decimal precision edge values + happy/notify combinations & varies \\ \hline
+TC-004-001 & UC & Grade nominal (50) -- baseline success scenario & success \\ \hline
+TC-004-002..004 & BVA & Grade lower-bound boundaries ($-0.01$ fail, 0 min, 0.01 min$+$) & fail/success \\ \hline
+TC-004-005..006 & BVA & Grade upper-bound boundaries (99.99 max$-$, 100 max) & success \\ \hline
+TC-004-007..009 & BVA & Grade out of range (100.01, $-5$, 105) -- above max / below min & fail \\ \hline
+TC-004-010..012 & ECP & Non-numeric / empty grade (letters, special chars, empty) & fail/success \\ \hline
+TC-004-013..017 & BVA/UC & Decimal precision edge values + repeat/happy combinations & varies \\ \hline
 \end{tabularx}
 \caption{TC-004 test case purpose by group (17 rows total)}
 \end{table}
@@ -388,7 +391,7 @@ TC-005-025..028 & UC & Happy path + exception flows (empty title, negative durat
 \textbf{Data file:} \texttt{level1/TC-006\_data.csv} (27 rows).\\
 \textbf{CSV schema:} \texttt{test\_case\_id, name, timeclose\_enabled, close\_offset\_days, close\_offset\_years, timelimit\_enabled, timelimit\_number, gradepass, expected\_result}.
 
-\textbf{Special handling:} The \texttt{expected\_result} column distinguishes four failure sub-modes (\texttt{fail\_grade}, \texttt{fail\_time}, \texttt{fail\_date}, \texttt{fail\_name}) identified by the specific \texttt{id\_error\_*} element rendered after submit. This gives more precise assertions than a generic \texttt{fail}.
+\textbf{Special handling:} The \texttt{expected\_result} column contains the full Moodle error message string returned after form submission. The script matches this as a case-insensitive substring in the page source, giving precise per-error assertions.
 
 \textbf{Test-case purpose grouped by technique:}
 \begin{table}[H]
@@ -467,7 +470,7 @@ A single helper \texttt{loc(row, prefix)} translates a pair of CSV columns into 
 from selenium.webdriver.common.by import By
 
 BY_MAP = {
-    "id": By.ID, "name": By.NAME, "css": By.CSS_SELECTOR,
+    "id": By.ID, "name": By.NAME, "css selector": By.CSS_SELECTOR,
     "xpath": By.XPATH, "link text": By.LINK_TEXT,
     "partial link text": By.PARTIAL_LINK_TEXT,
     "tag name": By.TAG_NAME, "class name": By.CLASS_NAME,
