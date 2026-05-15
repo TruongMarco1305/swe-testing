@@ -54,7 +54,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, InvalidSessionIdException
-from webdriver_manager.chrome import ChromeDriverManager
+try:
+    from webdriver_manager.chrome import ChromeDriverManager
+except Exception:
+    ChromeDriverManager = None
 
 # ---------------------------------------------------------------------------
 # Shared utilities
@@ -85,6 +88,20 @@ _DIR = os.path.dirname(__file__)
 #     while keeping all rows in the SAME run consistent — meaning the
 #     duplicate-test row hits the exact value the success row just inserted.
 _SESSION_TAG = uuid.uuid4().hex[:6]
+
+
+def make_chrome_driver(options):
+    """Prefer webdriver-manager for local Windows runs, fallback to Selenium Manager."""
+    if ChromeDriverManager is not None:
+        try:
+            return webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()),
+                options=options,
+            )
+        except Exception:
+            pass
+    options.browser_version = "stable"
+    return webdriver.Chrome(service=Service(), options=options)
 
 
 def load_csv(filename: str) -> list:
@@ -184,8 +201,7 @@ class _BaseLevel2(unittest.TestCase):
         opts = webdriver.ChromeOptions()
         opts.add_argument("--no-sandbox")
         opts.add_argument("--disable-dev-shm-usage")
-        cls.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()), options=opts)
+        cls.driver = make_chrome_driver(opts)
         cls.driver.set_window_size(1400, 900)
         cls.wait = WebDriverWait(cls.driver, 20)
 
@@ -829,8 +845,10 @@ class TestCreateUserLevel2(_BaseLevel2):
         driver.get(login_url)
         wait.until(EC.presence_of_element_located((By.ID, "username")))
         cls._dismiss_cookie_banner()
-        driver.find_element(By.ID, "username").send_keys("sang.truong2005@hcmut.edu.vn")
-        driver.find_element(By.ID, "password").send_keys("Abcdxyz12@")
+        admin_username = row.get("admin_username", "sang.truong2005@hcmut.edu.vn")
+        admin_password = row.get("admin_password", "Abcdxyz12@")
+        driver.find_element(By.ID, "username").send_keys(admin_username)
+        driver.find_element(By.ID, "password").send_keys(admin_password)
         driver.execute_script("document.getElementById('loginbtn').click();")
         wait.until(EC.url_contains("/my/"))
         time.sleep(1)
@@ -848,11 +866,12 @@ class TestCreateUserLevel2(_BaseLevel2):
         uname.clear()
         if row["username"].strip():
             val = row["username"].strip()
-            tag = _SESSION_TAG
-            if len(val) + len(tag) + 1 <= 100:
-                val = f"{val}_{tag}"
-            else:
-                val = f"{val[:100-len(tag)-1]}_{tag}"
+            if val != "admin":
+                tag = _SESSION_TAG
+                if len(val) + len(tag) + 1 <= 100:
+                    val = f"{val}_{tag}"
+                else:
+                    val = f"{val[:100-len(tag)-1]}_{tag}"
             uname.send_keys(val)
 
         # Password — either generate via checkbox or inject via JS
