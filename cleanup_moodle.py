@@ -41,7 +41,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
+try:
+    from webdriver_manager.chrome import ChromeDriverManager
+except Exception:
+    ChromeDriverManager = None
 
 # ── Configuration ──────────────────────────────────────────────────────────
 BASE_URL  = "https://xuansang1234.moodlecloud.com"
@@ -113,14 +116,23 @@ def log_ok(msg):       print(f"  [OK]   {msg}")
 # ══════════════════════════════════════════════════════════════════════════
 def make_driver(headless=False):
     opts = webdriver.ChromeOptions()
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
     if headless:
         opts.add_argument("--headless=new")
         opts.add_argument("--window-size=1920,1080")
     else:
         opts.add_argument("--start-maximized")
-    return webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=opts)
+    if ChromeDriverManager is not None:
+        try:
+            return webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()),
+                options=opts,
+            )
+        except Exception:
+            pass
+    opts.browser_version = "stable"
+    return webdriver.Chrome(service=Service(), options=opts)
 
 
 def login(driver, wait):
