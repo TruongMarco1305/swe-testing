@@ -4,19 +4,23 @@
 ================================================================================
 
   USAGE
-    .\install_nfr_deps.ps1              # Install everything
-    .\install_nfr_deps.ps1 -SkipZap     # Skip Java + ZAP (only Python deps)
+    .\install_nfr_deps.ps1              # Install Python packages (recommended)
+    .\install_nfr_deps.ps1 -SkipZap     # Same — ZAP is no longer required
     .\install_nfr_deps.ps1 -CheckOnly   # Probe what's installed, don't install
 
   INSTALLS
     1. Python packages from requirements.txt (pip)
-    2. Eclipse Temurin Java 17 JRE (winget)            [needed for ZAP]
-    3. OWASP ZAP 2.x (winget)                          [needed for security tests]
+       Includes: selenium, webdriver-manager, requests, axe-selenium-python,
+                 locust (for TC-001 performance), pytest
+
+  NOTE: OWASP ZAP / Java are no longer required.
+        Security tests (TC-002) now use lightweight requests-based probes.
+        The -SkipZap flag is accepted for compatibility but has no effect.
 
   REQUIREMENTS
-    - Windows 10/11 with winget (built-in on Win11)
+    - Windows 10/11
+    - Python 3.9+
     - Internet connection
-    - User Account Control (UAC) prompts will appear during install
 
 ================================================================================
 #>

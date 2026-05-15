@@ -1,41 +1,41 @@
 """
 NON-FUNCTIONAL TEST FILE 01 — TC-001 ADMIN ADDS A NEW USER
-                              Performance + Security
+                              Performance Testing
 Feature : Moodle LMS — Admin user-creation form
 Site    : https://xuansang1234.moodlecloud.com/user/editadvanced.php?id=-1
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NFR-1  PERFORMANCE TESTING  (Locust)
-  Tool          : pip install locust
-  Approach      : Authenticated admin opens the "Add new user" form
-                  repeatedly under concurrency; measures form-render
-                  latency, RPS, and failure rate.
-  Run           : locust -f test_nfr_01_login_perf_sec.py --class-picker
-
-NFR-2  SECURITY TESTING     (requests — passive probes)
-  Tool          : pip install requests
-  Approach      : Verify the add-user endpoint enforces authentication,
-                  the login form embeds a CSRF token, the XSS payload
-                  submitted as username is HTML-escaped, and malformed
-                  POSTs do not surface PHP errors.
-  Run           : python -m unittest test_nfr_01_login_perf_sec.py
+NFR  PERFORMANCE TESTING  (Locust + time.time() SLA assertions)
+  Tool      : pip install locust requests
+  Approach  : Authenticated admin opens the "Add new user" form
+              repeatedly under concurrency; measures form-render
+              latency, RPS, and failure rate.
+              A unittest class validates SLA thresholds against the
+              live server using direct HTTP requests.
+  SLAs      : login page  ≤ 5 s · add-user form  ≤ 8 s
+  Locust    : locust -f TC-001.py --class-picker
+  Unittest  : python -m pytest TC-001.py -v
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import re
 import sys
+import time
 import unittest
 
 # ── Shared configuration ──────────────────────────────────────────────────
-BASE_URL     = "https://xuansang1234.moodlecloud.com"
-LOGIN_URL    = BASE_URL + "/login/index.php"
+BASE_URL      = "https://xuansang1234.moodlecloud.com"
+LOGIN_URL     = BASE_URL + "/login/index.php"
 DASHBOARD_URL = BASE_URL + "/my/"
-ADD_USER_URL = BASE_URL + "/user/editadvanced.php?id=-1"
-USERNAME     = "sang.truong2005@hcmut.edu.vn"
-PASSWORD     = "Abcdxyz12@"
-UA           = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36")
+ADD_USER_URL  = BASE_URL + "/user/editadvanced.php?id=-1"
+USERNAME      = "sang.truong2005@hcmut.edu.vn"
+PASSWORD      = "Abcdxyz12@"
+UA            = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                 "AppleWebKit/537.36 (KHTML, like Gecko) "
+                 "Chrome/120.0.0.0 Safari/537.36")
+
+SLA_LOGIN_S        = 5.0   # login GET/POST must complete within this many seconds
+SLA_ADD_USER_FORM_S = 8.0  # authenticated add-user form load SLA
 
 
 def _login_session():
@@ -54,10 +54,9 @@ def _login_session():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# NFR-1  PERFORMANCE  — Locust (authenticated admin loads add-user form)
+# NFR  PERFORMANCE  — Locust (authenticated admin loads add-user form)
 # ══════════════════════════════════════════════════════════════════════════
 # Locust's gevent monkey-patches `ssl` at import time. Under pytest the
-# selenium imports done by level1 tests have already loaded ssl, so the
 # late monkey-patch produces RecursionError. Skip the Locust import path
 # entirely when running under pytest — locust users are only needed when
 # the file is invoked via the `locust` CLI.
@@ -100,76 +99,70 @@ if "pytest" not in sys.modules:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# NFR-2  SECURITY  — passive probes for the Add-User feature
+# NFR  PERFORMANCE  — SLA assertions (unittest via pytest)
 # ══════════════════════════════════════════════════════════════════════════
-class TestAddUserSecurity(unittest.TestCase):
-    """Security probes for TC-001 (Admin Adds a New User) feature."""
-
-    PHP_ERROR_PATTERNS = [
-        "<b>Fatal error</b>", "<b>Parse error</b>",
-        "<b>Warning</b>:", "<b>Notice</b>:",
-        "Call to undefined function", "Call to a member function",
-        "Uncaught Error:", "Uncaught Exception:", "Stack trace:",
-    ]
+class TestAddUserPerformance(unittest.TestCase):
+    """SLA-based performance tests for TC-001 (Admin Adds a New User)."""
 
     @classmethod
     def setUpClass(cls):
         cls.session = _login_session()
 
-    def test_01_add_user_form_requires_authentication(self):
-        """Anonymous GET to /user/editadvanced.php must redirect to login."""
+    def test_01_login_page_loads_within_sla(self):
+        """GET /login/index.php must respond within the SLA."""
         import requests
-        anon = requests.Session()
-        anon.headers.update({"User-Agent": UA})
-        r = anon.get(ADD_USER_URL, timeout=20, allow_redirects=True)
-        is_login = (
-            "/login/" in r.url or
-            'name="logintoken"' in r.text or
-            ('name="username"' in r.text and 'name="password"' in r.text)
-        )
-        self.assertTrue(is_login,
-                        f"Add-User form accessible without auth; url={r.url}")
-        print(f"\n  [SEC] Anonymous access to Add-User redirected to login [OK]")
-
-    def test_02_login_form_has_csrf_token(self):
-        """Moodle login form must embed a CSRF logintoken."""
-        import requests
+        start = time.time()
         r = requests.get(LOGIN_URL, headers={"User-Agent": UA}, timeout=15)
-        m = re.search(r'name="logintoken"\s+value="([^"]+)"', r.text)
-        self.assertIsNotNone(m, "Login form missing logintoken CSRF field")
-        print(f"\n  [SEC] Login CSRF logintoken present (len={len(m.group(1))}) [OK]")
+        elapsed = time.time() - start
+        self.assertEqual(r.status_code, 200,
+                         f"Login page returned {r.status_code}")
+        self.assertLessEqual(elapsed, SLA_LOGIN_S,
+                             f"Login page load {elapsed:.2f}s exceeds SLA {SLA_LOGIN_S}s")
+        print(f"\n  [PERF] Login page loaded in {elapsed:.3f}s "
+              f"(SLA ≤{SLA_LOGIN_S}s) [OK]")
 
-    def test_03_xss_payload_in_username_not_reflected(self):
-        """XSS payload as username must not be echoed unescaped on the login form."""
+    def test_02_add_user_form_loads_within_sla(self):
+        """Authenticated GET to the Add-User form must respond within the SLA."""
+        start = time.time()
+        r = self.session.get(ADD_USER_URL, timeout=15)
+        elapsed = time.time() - start
+        self.assertEqual(r.status_code, 200,
+                         f"Add-User form returned {r.status_code}")
+        self.assertLessEqual(elapsed, SLA_ADD_USER_FORM_S,
+                             f"Add-User form {elapsed:.2f}s exceeds SLA {SLA_ADD_USER_FORM_S}s")
+        print(f"\n  [PERF] Add-User form loaded in {elapsed:.3f}s "
+              f"(SLA ≤{SLA_ADD_USER_FORM_S}s) [OK]")
+
+    def test_03_login_post_completes_within_sla(self):
+        """A fresh login POST must complete within the SLA."""
         import requests
         s = requests.Session()
         s.headers.update({"User-Agent": UA})
         r0 = s.get(LOGIN_URL, timeout=15)
         m = re.search(r'name="logintoken"\s+value="([^"]+)"', r0.text)
         token = m.group(1) if m else ""
+        start = time.time()
+        s.post(LOGIN_URL,
+               data={"username": USERNAME, "password": PASSWORD,
+                     "logintoken": token},
+               timeout=20, allow_redirects=True)
+        elapsed = time.time() - start
+        self.assertLessEqual(elapsed, SLA_LOGIN_S,
+                             f"Login POST {elapsed:.2f}s exceeds SLA {SLA_LOGIN_S}s")
+        print(f"\n  [PERF] Login POST completed in {elapsed:.3f}s "
+              f"(SLA ≤{SLA_LOGIN_S}s) [OK]")
 
-        payload = '<script>alert("xss_u_' + 'a' * 8 + '")</script>'
-        post = s.post(LOGIN_URL,
-                      data={"username": payload, "password": "wrong",
-                            "logintoken": token},
-                      timeout=15)
-        self.assertNotIn(payload, post.text,
-                         "Raw <script> payload reflected on login — XSS risk")
-        print(f"\n  [SEC] XSS payload not reflected unescaped [OK]")
-
-    def test_04_no_php_error_on_malformed_login(self):
-        """A malformed POST must not leak unhandled PHP errors."""
-        import requests
-        bad = requests.post(LOGIN_URL,
-                            headers={"User-Agent": UA},
-                            data={"username": "x" * 5000,
-                                  "password": "y" * 5000},
-                            timeout=15)
-        body = bad.text
-        for pat in self.PHP_ERROR_PATTERNS:
-            self.assertNotIn(pat, body,
-                             f"Server leaked PHP error signature '{pat}'")
-        print(f"\n  [SEC] No PHP error/stack-trace leaks on malformed login [OK]")
+    def test_04_five_consecutive_form_loads_all_within_sla(self):
+        """Five back-to-back Add-User form loads must all stay within the SLA."""
+        for i in range(1, 6):
+            start = time.time()
+            r = self.session.get(ADD_USER_URL, timeout=15)
+            elapsed = time.time() - start
+            self.assertEqual(r.status_code, 200,
+                             f"Run #{i}: Add-User form returned {r.status_code}")
+            self.assertLessEqual(elapsed, SLA_ADD_USER_FORM_S,
+                                 f"Run #{i}: {elapsed:.2f}s exceeds SLA {SLA_ADD_USER_FORM_S}s")
+            print(f"\n  [PERF] Run #{i}: {elapsed:.3f}s ≤ {SLA_ADD_USER_FORM_S}s [OK]")
 
 
 if __name__ == "__main__":

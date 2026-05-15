@@ -1,21 +1,16 @@
 """
 NON-FUNCTIONAL TEST FILE 05 — TC-005 ADMIN CREATES A CALENDAR EVENT
-                              Performance + Accessibility
+                              Compatibility Testing
 Feature : Moodle LMS — Calendar month view (event creation entry point)
 Site    : https://xuansang1234.moodlecloud.com/calendar/view.php?view=month
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-NFR-1  PERFORMANCE TESTING   (Locust)
-  Tool      : pip install locust
-  Approach  : Authenticated admin repeatedly loads the calendar month
-              view and measures page-load latency under concurrency.
-  Run       : locust -f test_nfr_05_quiz_perf_a11y.py
-
-NFR-2  ACCESSIBILITY TESTING (axe-selenium-python)
-  Tool      : pip install axe-selenium-python selenium webdriver-manager
-  Approach  : Selenium opens the calendar in Chrome, injects axe-core,
-              and audits the month view for WCAG violations.
-  Run       : python -m unittest test_nfr_05_quiz_perf_a11y.py
+NFR  COMPATIBILITY TESTING  (Selenium — viewport resizing)
+  Tool      : pip install selenium webdriver-manager
+  Approach  : Resize the Chrome window to Desktop, Tablet and Mobile
+              breakpoints and verify the calendar renders key elements
+              without layout overflow at each viewport.
+  Run       : python -m pytest TC-005.py -v
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
@@ -23,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 import time
 import unittest
 
@@ -32,67 +28,39 @@ CALENDAR_URL  = BASE_URL + "/calendar/view.php?view=month"
 USERNAME      = "sang.truong2005@hcmut.edu.vn"
 PASSWORD      = "Abcdxyz12@"
 
+VIEWPORTS = [
+    {"name": "Desktop", "width": 1920, "height": 1080},
+    {"name": "Tablet",  "width": 768,  "height": 1024},
+    {"name": "Mobile",  "width": 375,  "height": 812},
+]
 
-# ══════════════════════════════════════════════════════════════════════════
-# NFR-1  PERFORMANCE  — Locust (authenticated calendar load)
-# ══════════════════════════════════════════════════════════════════════════
-# Skip Locust import under pytest — gevent monkey-patching of `ssl` after
-# selenium has loaded it causes RecursionError during pytest collection.
-def _define_locust_users():
-    from locust import HttpUser, task, between
-
-    class CalendarPerfUser(HttpUser):
-        host = BASE_URL
-        wait_time = between(1, 4)
-
-        def on_start(self):
-            r = self.client.get("/login/index.php", name="GET /login")
-            m = re.search(r'name="logintoken" value="([^"]+)"', r.text)
-            token = m.group(1) if m else ""
-            self.client.post("/login/index.php",
-                             data={"username": USERNAME,
-                                   "password": PASSWORD,
-                                   "logintoken": token},
-                             name="POST /login")
-
-        @task
-        def load_calendar_month(self):
-            with self.client.get("/calendar/view.php?view=month",
-                                 name="GET /calendar (month)",
-                                 catch_response=True) as r:
-                if r.status_code != 200:
-                    r.failure(f"Calendar returned {r.status_code}")
-
-    globals()["CalendarPerfUser"] = CalendarPerfUser
-
-
-if "pytest" not in sys.modules:
-    try:
-        _define_locust_users()
-    except ImportError:
-        pass
+CALENDAR_GRID_SELECTOR = (
+    ".calendarwrapper, table.calendartable, .calendar-monthly-cell"
+)
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# NFR-2  ACCESSIBILITY  — axe-selenium-python on the calendar month view
+# NFR  COMPATIBILITY  — calendar renders correctly at multiple viewports
 # ══════════════════════════════════════════════════════════════════════════
-class TestCalendarAccessibility(unittest.TestCase):
+class TestCalendarCompatibility(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         from selenium import webdriver
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.support.ui import WebDriverWait
-        from webdriver_manager.chrome import ChromeDriverManager
+        try:
+            from webdriver_manager.chrome import ChromeDriverManager
+            svc = Service(ChromeDriverManager().install())
+        except Exception:
+            svc = Service()
 
         opts = webdriver.ChromeOptions()
-        opts.add_argument("--start-maximized")
-        cls.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()), options=opts)
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
+        cls.driver = webdriver.Chrome(service=svc, options=opts)
         cls.wait = WebDriverWait(cls.driver, 20)
         cls._login()
-        cls.driver.get(CALENDAR_URL)
-        time.sleep(2)
 
     @classmethod
     def tearDownClass(cls):
@@ -117,54 +85,95 @@ class TestCalendarAccessibility(unittest.TestCase):
         cls.wait.until(EC.url_contains("/my/"))
         time.sleep(1)
 
-    def test_01_axe_audit_calendar_month_view(self):
-        """Full axe audit on the calendar month view."""
-        from axe_selenium_python import Axe
+    def _set_viewport(self, width, height):
+        """Resize the browser window to achieve the desired inner viewport."""
+        chrome_w = self.driver.execute_script(
+            "return window.outerWidth - window.innerWidth;"
+        )
+        chrome_h = self.driver.execute_script(
+            "return window.outerHeight - window.innerHeight;"
+        )
+        self.driver.set_window_size(width + chrome_w, height + chrome_h)
 
-        axe = Axe(self.driver)
-        axe.inject()
-        results = axe.run()
-
-        report_path = os.path.join(os.path.dirname(__file__),
-                                   "a11y_calendar_report.json")
-        with open(report_path, "w", encoding="utf-8") as fh:
-            json.dump(results, fh, indent=2)
-
-        violations = results.get("violations", [])
-        critical = [v for v in violations
-                    if v.get("impact") in ("critical", "serious")]
-        print(f"\n  [A11Y] Total violations  : {len(violations)}")
-        print(f"  [A11Y] Critical/Serious  : {len(critical)}")
-        for v in critical:
-            print(f"    - {v['impact'].upper()} - {v['id']}: {v['description']}")
-        self.assertIsInstance(results, dict)
-        self.assertIn("violations", results)
-        self.assertIn("passes", results)
-        print(f"  [A11Y] Rules passed       : {len(results.get('passes', []))}")
-
-    def test_02_new_event_link_reachable(self):
-        """The 'New event' control must be discoverable on the calendar page."""
+    def test_01_desktop_calendar_renders_key_elements(self):
+        """Calendar grid must be visible at 1920×1080 (Desktop)."""
         from selenium.webdriver.common.by import By
+        vp = VIEWPORTS[0]
+        self._set_viewport(vp["width"], vp["height"])
+        self.driver.get(CALENDAR_URL)
+        time.sleep(2)
+        grid = self.driver.find_elements(By.CSS_SELECTOR, CALENDAR_GRID_SELECTOR)
+        self.assertTrue(grid,
+                        f"[{vp['name']}] Calendar grid not found "
+                        f"({CALENDAR_GRID_SELECTOR})")
+        print(f"\n  [COMPAT] {vp['name']} ({vp['width']}×{vp['height']}): "
+              f"grid present [OK]")
 
-        # Moodle 4.x: "New event" button has data-action="new-event-button"
-        # Older themes used <a class="btn"...>New event</a>
-        candidates = self.driver.find_elements(
-            By.CSS_SELECTOR,
-            "[data-action='new-event-button'], "
-            "a[href*='action=new'], button[data-handler='new-event']"
+    def test_02_tablet_calendar_renders_key_elements(self):
+        """Calendar grid must be visible at 768×1024 (Tablet)."""
+        from selenium.webdriver.common.by import By
+        vp = VIEWPORTS[1]
+        self._set_viewport(vp["width"], vp["height"])
+        self.driver.get(CALENDAR_URL)
+        time.sleep(2)
+        grid = self.driver.find_elements(By.CSS_SELECTOR, CALENDAR_GRID_SELECTOR)
+        self.assertTrue(grid,
+                        f"[{vp['name']}] Calendar grid not found "
+                        f"({CALENDAR_GRID_SELECTOR})")
+        print(f"\n  [COMPAT] {vp['name']} ({vp['width']}×{vp['height']}): "
+              f"grid present [OK]")
+
+    def test_03_mobile_calendar_renders_without_crash(self):
+        """Calendar page must load at 375×812 (Mobile) without login redirect."""
+        from selenium.webdriver.common.by import By
+        vp = VIEWPORTS[2]
+        self._set_viewport(vp["width"], vp["height"])
+        self.driver.get(CALENDAR_URL)
+        time.sleep(2)
+        body = self.driver.find_elements(By.TAG_NAME, "body")
+        self.assertTrue(body, f"[{vp['name']}] Page body missing")
+        self.assertNotIn("/login/", self.driver.current_url,
+                         f"[{vp['name']}] Redirected to login at mobile viewport")
+        print(f"\n  [COMPAT] {vp['name']} ({vp['width']}×{vp['height']}): "
+              f"page loaded without crash [OK]")
+
+    def test_04_no_horizontal_overflow_at_tablet_viewport(self):
+        """Page must not overflow horizontally at 768×1024 (Tablet)."""
+        vp = VIEWPORTS[1]
+        self._set_viewport(vp["width"], vp["height"])
+        self.driver.get(CALENDAR_URL)
+        time.sleep(2)
+        scroll_w = self.driver.execute_script(
+            "return document.documentElement.scrollWidth;"
         )
-        has_text = any(
-            "new event" in (el.text or "").lower()
-            or "event" in (el.get_attribute("data-action") or "").lower()
-            for el in candidates
+        client_w = self.driver.execute_script(
+            "return document.documentElement.clientWidth;"
         )
-        # Fall back to a body-text scan if the button locator changed
-        if not candidates:
-            has_text = "new event" in (self.driver.page_source or "").lower()
-        self.assertTrue(candidates or has_text,
-                        "Could not locate the New-event control on the calendar")
-        print(f"\n  [A11Y] New-event control discoverable [OK]")
+        self.assertLessEqual(scroll_w, client_w + 20,
+                             f"[{vp['name']}] Horizontal overflow: "
+                             f"scrollWidth={scroll_w} > clientWidth={client_w}")
+        print(f"\n  [COMPAT] {vp['name']}: no horizontal overflow "
+              f"(scroll={scroll_w}, client={client_w}) [OK]")
+
+    def test_05_no_horizontal_overflow_at_mobile_viewport(self):
+        """Page must not overflow horizontally at 375×812 (Mobile)."""
+        vp = VIEWPORTS[2]
+        self._set_viewport(vp["width"], vp["height"])
+        self.driver.get(CALENDAR_URL)
+        time.sleep(2)
+        scroll_w = self.driver.execute_script(
+            "return document.documentElement.scrollWidth;"
+        )
+        client_w = self.driver.execute_script(
+            "return document.documentElement.clientWidth;"
+        )
+        self.assertLessEqual(scroll_w, client_w + 20,
+                             f"[{vp['name']}] Horizontal overflow: "
+                             f"scrollWidth={scroll_w} > clientWidth={client_w}")
+        print(f"\n  [COMPAT] {vp['name']}: no horizontal overflow "
+              f"(scroll={scroll_w}, client={client_w}) [OK]")
 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

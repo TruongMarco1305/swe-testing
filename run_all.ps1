@@ -10,8 +10,8 @@
     .\run_all.ps1 -Mode smoke        # 1-test smoke check (~30s)
     .\run_all.ps1 -Mode level1       # Run all Level 1 tests (6 TC files)
     .\run_all.ps1 -Mode level2       # Run all Level 2 tests (TC-ALL.py)
-    .\run_all.ps1 -Mode nfr          # Run 6 NFR files (pytest portion)
-    .\run_all.ps1 -Mode locust       # Launch one of 4 Locust files
+    .\run_all.ps1 -Mode nfr          # Run 6 NFR files (perf/sec/a11y/rel/compat/usab)
+    .\run_all.ps1 -Mode locust       # Launch Locust performance test (TC-001)
     .\run_all.ps1 -Mode cleanup      # Delete test data from Moodle
     .\run_all.ps1 -Mode cleanup-dry  # Preview cleanup without deleting
     .\run_all.ps1 -Mode all          # Everything (~1h30m)
@@ -152,7 +152,7 @@ function Invoke-Level2 {
 }
 
 function Invoke-Nfr {
-    Write-Section "NFR - 6 files (Locust + requests-based security + axe)"
+    Write-Section "NFR - 6 files (Performance | Security | Accessibility | Reliability | Compatibility | Usability)"
     Push-Location $NfrDir
     & python -m pytest TC-001.py `
                        TC-002.py `
@@ -206,39 +206,15 @@ function Invoke-Cleanup {
 }
 
 function Invoke-LocustMenu {
-    Write-Section "LOCUST - Performance load testing"
-    $files = @(
-        "TC-001.py",
-        "TC-002.py",
-        "TC-004.py",
-        "TC-005.py"
-    )
-    $labels = @(
-        "TC-001 Add-User form - authed load",
-        "TC-002 New-Course form - authed load",
-        "TC-004 Grader page - authed load",
-        "TC-005 Calendar month view - authed load"
-    )
-    for ($i = 0; $i -lt $files.Count; $i++) {
-        $n = $i + 1
-        Write-Host ("  [{0}] {1,-15} {2}" -f $n, $files[$i], $labels[$i])
-    }
-    $choice = Read-Host "Pick a file (1-4)"
-    $idx = 0
-    if (-not [int]::TryParse($choice, [ref]$idx) -or $idx -lt 1 -or $idx -gt $files.Count) {
-        Write-Fail "Invalid choice: $choice"
-        return
-    }
-    $file = $files[$idx - 1]
-
-    Write-Step "Starting Locust with $file"
+    Write-Section "LOCUST - Performance load testing (TC-001: Add-User form)"
+    Write-Step "Starting Locust with TC-001.py"
     Write-Host "-> Open http://localhost:8089 in your browser" -ForegroundColor Cyan
     Write-Host "-> Number of users: 50,  Spawn rate: 5"        -ForegroundColor Cyan
     Write-Host "-> Host: https://xuansang1234.moodlecloud.com" -ForegroundColor Cyan
     Write-Host "-> Press Ctrl+C in this window when done"      -ForegroundColor Cyan
 
     Push-Location $NfrDir
-    & locust -f $file
+    & locust -f TC-001.py
     Pop-Location
 }
 
@@ -262,8 +238,8 @@ function Show-Menu {
     Write-Host "  [2] Smoke test   - 1 test case sanity check         (~30s)"
     Write-Host "  [3] Level 1      - all TC-XXX_code.py files         (~30 min)"
     Write-Host "  [4] Level 2      - all 169 cases in TC-ALL.py       (~30 min)"
-    Write-Host "  [5] NFR          - 6 files (perf + sec + a11y)      (~10 min)"
-    Write-Host "  [6] Locust       - pick a load-test file (interactive)"
+    Write-Host "  [5] NFR          - 6 files (perf/sec/a11y/rel/compat/usab) (~10 min)"
+    Write-Host "  [6] Locust       - TC-001 performance load-test (interactive)"
     Write-Host "  [7] Single TC    - run one TC-XXX across all 3 dirs"
     Write-Host "  [8] ALL          - everything                       (~1h30m)"
     Write-Host "  [c] Cleanup      - delete test data from Moodle"

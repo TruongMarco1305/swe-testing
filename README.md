@@ -93,46 +93,41 @@ python -m pytest TC-ALL.py -v -k "TC_004_002"
 
 ## Non-Functional Tests
 
-Each TC file in `non_functional/` contains two non-functional test types.
-The table below shows which types each file implements:
+Each TC file in `non_functional/` is dedicated to a single non-functional test type:
 
-| File       | NFR-1               | NFR-2               |
-|------------|---------------------|---------------------|
-| `TC-001.py`| Performance (Locust)| Security (requests) |
-| `TC-002.py`| Performance (Locust)| Accessibility (axe) |
-| `TC-003.py`| Security (requests) | Accessibility (axe) |
-| `TC-004.py`| Performance (Locust)| Security (requests) |
-| `TC-005.py`| Performance (Locust)| Accessibility (axe) |
-| `TC-006.py`| Security (requests) | Accessibility (axe) |
+| File        | NFR Type        | Tool                        | Feature                  |
+|-------------|-----------------|-----------------------------|--------------------------|
+| `TC-001.py` | Performance     | `requests` + SLA timers     | Admin Adds a New User    |
+| `TC-002.py` | Security        | `requests` passive probes   | Admin Creates a Course   |
+| `TC-003.py` | Accessibility   | `axe-selenium-python` (WCAG)| Teacher Creates Assignment|
+| `TC-004.py` | Reliability     | `requests` repeated loads   | Teacher Grades a Student |
+| `TC-005.py` | Compatibility   | Selenium viewport resize    | Admin Creates Calendar Event|
+| `TC-006.py` | Usability       | Selenium keyboard nav/focus | Teacher Creates a Quiz   |
 
-### Run the pytest portion (Security + Accessibility)
+### Run all NFR tests (pytest)
 
 ```bash
 cd non_functional
 
-python -m pytest TC-001.py -v
-python -m pytest TC-002.py -v
-python -m pytest TC-003.py -v
-python -m pytest TC-004.py -v
-python -m pytest TC-005.py -v
-python -m pytest TC-006.py -v
+python -m pytest TC-001.py -v   # Performance  — SLA checks
+python -m pytest TC-002.py -v   # Security     — auth + CSRF + XSS probes
+python -m pytest TC-003.py -v   # Accessibility — axe WCAG audit
+python -m pytest TC-004.py -v   # Reliability  — repeated load consistency
+python -m pytest TC-005.py -v   # Compatibility — Desktop / Tablet / Mobile viewports
+python -m pytest TC-006.py -v   # Usability    — keyboard nav + focus indicators
 
 # All at once
 python -m pytest . -v
 ```
 
-### Run Locust load tests (Performance — interactive)
+### Run Locust load test (Performance — TC-001 only, interactive)
 
 Locust opens a browser UI at `http://localhost:8089`. Recommended settings:
 users **50**, spawn rate **5**, host `https://xuansang1234.moodlecloud.com`.
 
 ```bash
 cd non_functional
-
-locust -f TC-001.py   # TC-001  Add-User form
-locust -f TC-002.py   # TC-002  New-Course form
-locust -f TC-004.py   # TC-004  Grader page
-locust -f TC-005.py   # TC-005  Calendar month view
+locust -f TC-001.py
 ```
 
 Press `Ctrl+C` in the terminal to stop Locust.
