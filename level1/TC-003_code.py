@@ -1,17 +1,26 @@
 """
-TC-003 – Teacher Creates an Assignment (Level 1)
-=================================================
-Data-driven Selenium test: one unittest method per CSV row.
-Preparation: logs in as admin and switches role to Teacher on course 10.
-Each test case navigates to the "Add Assignment" form, fills fields, submits,
-and asserts the expected outcome (success / fail).
+LEVEL 1 — Data-Driven Automation Testing
+TC-003 : Teacher Creates an Assignment (Moodle LMS)
+Converted from: TC-003.krecorder (Katalon Recorder)
+
+Data-driven approach
+--------------------
+Varying values (name, gradepass, duedate_enabled, duedate_offset_days/years,
+cutoff_offset_days/years, submission_file, submission_onlinetext,
+expected_result) are read from TC-003_data.csv.
+Locators and the assignment creation URL are hardcoded here.
+
+Preparation
+-----------
+setUpClass logs in as admin then switches role to Teacher on course 10
+before all test methods run.
 
 Run all:
     cd level1
-    python3 -m pytest test_assign_level1.py -v
+    python -m pytest TC-003_code.py -v
 
 Run single:
-    python3 -m pytest test_assign_level1.py -v -k "TC_003_001"
+    python -m pytest TC-003_code.py -v -k "TC_003_001"
 """
 
 import csv

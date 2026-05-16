@@ -1,6 +1,20 @@
 """
-TC-005: Admin Creates a Calendar Event
-Level-1 Selenium test – data-driven from TC-005_data.csv
+LEVEL 1 — Data-Driven Automation Testing
+TC-005 : Admin Creates a Calendar Event (Moodle LMS)
+Converted from: TC-005.krecorder (Katalon Recorder)
+
+Data-driven approach
+--------------------
+Varying values (name, duration_type, minutes, until_offset_days, repeat,
+expected_result) are read from TC-005_data.csv.
+Locators and the calendar URL are hardcoded here.
+
+Run all:
+    cd level1
+    python -m pytest TC-005_code.py -v
+
+Run single:
+    python -m pytest TC-005_code.py -v -k "TC_005_001"
 """
 
 import csv

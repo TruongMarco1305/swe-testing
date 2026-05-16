@@ -1,6 +1,20 @@
 """
-TC-006: Teacher Creates a Quiz
-Level-1 Selenium test – data-driven from TC-006_data.csv
+LEVEL 1 — Data-Driven Automation Testing
+TC-006 : Teacher Creates a Quiz (Moodle LMS)
+Converted from: TC-006.krecorder (Katalon Recorder)
+
+Data-driven approach
+--------------------
+Varying values (quiz_name, close_date_enabled, close_date_offset_days/years,
+time_limit_enabled, time_limit_minutes, grade_to_pass, expected_result) are
+read from TC-006_data.csv.  Locators and the quiz creation URL are hardcoded.
+
+Run all:
+    cd level1
+    python -m pytest TC-006_code.py -v
+
+Run single:
+    python -m pytest TC-006_code.py -v -k "TC_006_001"
 """
 
 import csv

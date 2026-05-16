@@ -1,34 +1,20 @@
 """
 LEVEL 1 — Data-Driven Automation Testing
-Feature : Admin Creates a New Course (Moodle LMS) — Feature 002
+TC-002 : Admin Creates a New Course (Moodle LMS)
 Converted from: TC-002.krecorder (Katalon Recorder)
 
-How this was converted from Katalon Recorder
----------------------------------------------
-Katalon step               →  Python Selenium
-──────────────────────────────────────────────────────────────
-open <url>                 →  driver.get(url)
-pause 5000                 →  time.sleep(5)
-type  id=X, val            →  driver.find_element(By.ID,"X").send_keys(val)
-runScript <js>             →  driver.execute_script(js)
-click id=id_saveanddisplay →  JS click (sticky footer intercept)
-verifyTextPresent          →  assertIn(text, driver.page_source)
-verifyElementPresent css=X →  assertTrue(driver.find_elements(By.CSS_SELECTOR, X))
-
-Data-driven approach (Level 1)
---------------------------------
+Data-driven approach
+--------------------
 Varying values (fullname, shortname, end_date_enabled, end_date_offset_days,
-end_date_offset_years, numsections) are read from TC-002_data.csv.
+end_date_offset_years, numsections, expected_result) are read from
+TC-002_data.csv.  All locators and the course creation URL are hardcoded here.
 
-All locators and the course creation URL are hardcoded here.
+Run all:
+    cd level1
+    python -m pytest TC-002_code.py -v
 
-Key test logic
---------------
-* TC-002-002 : empty fullname                     → fail (required field)
-* TC-002-007 : empty shortname                    → fail (required field)
-* TC-002-012/013/027 : end date in past or today  → fail (must be after start)
-* TC-002-018/026 : duplicate shortname            → fail
-* TC-002-019/021/025 : end_date_enabled=no        → success (no-end-date allowed)
+Run single:
+    python -m pytest TC-002_code.py -v -k "TC_002_001"
 """
 
 import csv

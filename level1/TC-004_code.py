@@ -1,19 +1,19 @@
 """
-TC-004 – Teacher Grades a Student Assignment (Level 1)
-=======================================================
-Data-driven Selenium test: one unittest method per CSV row.
-Preparation: logs in as admin (full rights) on course 140.
+LEVEL 1 — Data-Driven Automation Testing
+TC-004 : Teacher Grades a Student Assignment (Moodle LMS)
+Converted from: TC-004.krecorder (Katalon Recorder)
 
-Each test navigates to the grader page (mod/assign id=41, userid=2), fills the
-grade field via React-compatible JS, submits "Save changes", then checks
-the custom __test_marker attribute injected by JS to determine success/fail.
+Data-driven approach
+--------------------
+Varying values (grade, feedback, expected_result) are read from
+TC-004_data.csv.  Locators and the grading page URL are hardcoded here.
 
 Run all:
     cd level1
-    python3 -m pytest test_grade_level1.py -v
+    python -m pytest TC-004_code.py -v
 
 Run single:
-    python3 -m pytest test_grade_level1.py -v -k "TC_004_002"
+    python -m pytest TC-004_code.py -v -k "TC_004_002"
 """
 
 import csv

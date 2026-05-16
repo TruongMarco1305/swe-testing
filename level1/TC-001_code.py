@@ -1,28 +1,20 @@
 """
 LEVEL 1 — Data-Driven Automation Testing
-Feature : Admin Adds a New User (Moodle LMS) — Feature 001
-Tester  : Nguyễn Hữu Phúc
+TC-001 : Admin Adds a New User (Moodle LMS)
 Converted from: TC-001.krecorder (Katalon Recorder)
 
-How this was converted from Katalon Recorder
----------------------------------------------
-Katalon step        →  Python Selenium
-────────────────────────────────────────────
-open <url>          →  driver.get(url)
-pause 5000          →  time.sleep(5)
-click id=X          →  driver.find_element(By.ID, "X").click()
-type  id=X, val     →  driver.find_element(By.ID, "X").send_keys(val)
-runScript <js>      →  driver.execute_script(js)
-verifyTextPresent   →  self.assertIn(text, driver.page_source)
-verifyElementPresent css=X → self.assertTrue(driver.find_elements(By.CSS_SELECTOR, X))
+Data-driven approach
+--------------------
+Varying values (username, password, email, expected_result) are read from
+TC-001_data.csv.  All other values (firstname, lastname, locators, URLs)
+are hardcoded in this file.
 
-Data-driven approach (Level 1)
---------------------------------
-The VARYING values across TC-001-001 … TC-001-010:
-  username, password, email, expected_result
-are extracted into TC-001_data.csv.
+Run all:
+    cd level1
+    python -m pytest TC-001_code.py -v
 
-Everything else (firstname, lastname, locators, URLs) is hardcoded here.
+Run single:
+    python -m pytest TC-001_code.py -v -k "TC_001_005"
 """
 
 import csv

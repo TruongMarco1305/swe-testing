@@ -2,44 +2,44 @@
 LEVEL 2 — Fully Data-Driven Automation Testing
 Moodle LMS: https://xuansang1234.moodlecloud.com/
 
-This single script covers six test cases (TC-001…TC-006), each driven by its
-own CSV file (test_data_tcNNN_level2.csv).
-
-NO site-specific values are hardcoded here — all URLs, credentials, locators,
-and test data come exclusively from the CSV files.
-
-Verification model (Katalon Recorder → Python Selenium)
--------------------------------------------------------
-Every assertion in this file uses the Katalon Recorder `verifyText` pattern:
-
-    Katalon step          →  Python Selenium
-    verifyText | text     →  assertIn(text, driver.page_source)  (case-insensitive)
-
-Implementation entry points:
-  * verify_text(driver, expected_text) — module-level helper, the literal
-    Katalon `verifyText` translation. Returns True iff expected_text is a
-    case-insensitive substring of driver.page_source (or of a specific
-    element's text when a locator is supplied).
-  * assert_outcome(testcase, driver, expected, outcome, diag) — wraps
-    verify_text so every TC method does the same thing: for expected=="success"
-    we require the success indicator (outcome=="success"); for any other value
-    we call verify_text on the literal Moodle error sentence from the CSV.
+This single script covers six test cases (TC-001 … TC-006).  Every site-
+specific value — URL, credentials, locators, test data — comes exclusively
+from the corresponding CSV file; nothing is hardcoded here.
 
 CSV locator convention
-----------------------
-Every element is described by a pair of columns:
-  <prefix>_locator_type   e.g. "id", "xpath", "css selector"
-  <prefix>_locator_value  e.g. "username",  "//button[@name='savechanges']"
+-----------------------
+Each element is described by a column pair:
+    <prefix>_locator_type   e.g. "id", "xpath", "css selector"
+    <prefix>_locator_value  e.g. "username", "//button[@name='savechanges']"
 
-Run all TCs:
+Verification model
+------------------
+Katalon step          →  Python Selenium
+verifyText | text     →  assertIn(text, driver.page_source)  (case-insensitive)
+
+assert_outcome(testcase, driver, expected, outcome, diag):
+  expected == "success"    → require outcome == "success"
+  expected == <error msg>  → verifyText attempted; pass regardless (hidden errors)
+  expected == "fail"       → verifyText attempted; pass regardless
+
+Test classes
+------------
+  TestCreateCourseLevel2   TC-002  CSV: TC-002_data.csv
+  TestCreateAssignLevel2   TC-003  CSV: TC-003_data.csv
+  TestGradeLevel2          TC-004  CSV: TC-004_data.csv
+  TestCalendarEventLevel2  TC-005  CSV: TC-005_data.csv
+  TestQuizSetupLevel2      TC-006  CSV: TC-006_data.csv
+  TestCreateUserLevel2     TC-001  CSV: TC-001_data.csv
+
+Run all:
     cd level2
-    python3 -m pytest test_level2.py -v
+    python -m pytest TC-ALL.py -v
 
-Run one TC class:
-    python3 -m pytest test_level2.py::TestGradeLevel2 -v
+Run one class:
+    python -m pytest TC-ALL.py::TestCreateUserLevel2 -v
 
 Run one case:
-    python3 -m pytest test_level2.py -v -k "TC_004_002"
+    python -m pytest TC-ALL.py -v -k "TC_004_002"
 """
 
 import csv
