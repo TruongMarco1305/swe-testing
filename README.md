@@ -2,23 +2,46 @@
 
 ## Setup
 
-Install all dependencies:
+### macOS / Linux
 
 ```bash
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
-Requires Python 3.9+ and Google Chrome (latest). `webdriver-manager` handles ChromeDriver automatically.
+Requires Python 3.9+ and Google Chrome. `webdriver-manager` auto-downloads the matching ChromeDriver — no manual install needed.
 
-Or use the PowerShell helper (Windows):
+### Windows
 
 ```powershell
+pip install -r requirements.txt
+# or use the helper:
 .\install_nfr_deps.ps1
 ```
 
 ---
 
-## Quick Start (PowerShell — Windows)
+## Quick Start — macOS / Linux (bash)
+
+`run_all.sh` provides the same interactive menu as the Windows PowerShell helper.
+
+```bash
+chmod +x run_all.sh        # first time only
+./run_all.sh               # interactive menu (recommended)
+./run_all.sh setup         # install dependencies only
+./run_all.sh smoke         # 1-test smoke check (~30 s)
+./run_all.sh level1        # all Level 1 tests
+./run_all.sh level2        # all Level 2 tests
+./run_all.sh nfr           # all non-functional tests (pytest portion)
+./run_all.sh locust        # interactive Locust load-test launcher
+./run_all.sh all           # everything (~1 h 30 m)
+
+# Run one TC across all levels
+./run_all.sh tc 003
+```
+
+---
+
+## Quick Start — Windows (PowerShell)
 
 The `run_all.ps1` script provides an interactive menu covering every mode:
 
@@ -35,6 +58,11 @@ The `run_all.ps1` script provides an interactive menu covering every mode:
 # Run one TC across all levels
 .\run_all.ps1 -Mode tc -Tc 003
 ```
+
+---
+
+> **macOS / Linux**: use `python3` (and `pip3`) in place of `python` / `pip` in all commands below.
+> On macOS, `python` often points to Python 2 or is absent — `python3` is always the correct command.
 
 ---
 
@@ -137,7 +165,12 @@ Press `Ctrl+C` in the terminal to stop Locust.
 ## Run Everything
 
 ```bash
-# From repo root
+# macOS / Linux
+python3 -m pytest level1/ level2/ non_functional/ -v
+```
+
+```powershell
+# Windows
 python -m pytest level1/ level2/ non_functional/ -v
 ```
 
@@ -161,9 +194,16 @@ python cleanup_moodle.py --events            # only calendar events
 python cleanup_moodle.py --dry-run --all     # preview without deleting
 ```
 
-Or via the PowerShell helper:
+Or via the helper scripts:
+
+```bash
+# macOS / Linux
+./run_all.sh cleanup       # delete all test data
+./run_all.sh cleanup-dry   # preview without deleting
+```
 
 ```powershell
+# Windows
 .\run_all.ps1 -Mode cleanup      # delete all test data
 .\run_all.ps1 -Mode cleanup-dry  # preview without deleting
 ```
