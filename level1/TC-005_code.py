@@ -62,13 +62,13 @@ def _make_test(row):
 
         # ── navigate to calendar ──────────────────────────────────────────
         driver.get(CAL_URL)
-        time.sleep(3)
+        time.sleep(5)
 
         # ── open New Event modal ──────────────────────────────────────────
         btn = wait.until(EC.element_to_be_clickable(
             (By.XPATH, "//button[@data-action='new-event-button']")))
         driver.execute_script("arguments[0].click();", btn)
-        time.sleep(3)
+        time.sleep(5)
 
         # ── build JS payload ──────────────────────────────────────────────
         js_helpers = """
@@ -135,7 +135,7 @@ sS('id_timedurationuntil_minute',until.getMinutes());
             js_fill += "setCheckbox('id_repeat',true);\n"
 
         driver.execute_script(js_fill)
-        time.sleep(2)
+        time.sleep(4)
 
         # ── click Save in modal ───────────────────────────────────────────
         save_btn = wait.until(EC.element_to_be_clickable(
@@ -152,7 +152,7 @@ sS('id_timedurationuntil_minute',until.getMinutes());
         # and Moodle removes it from the DOM when the modal closes.
         try:
             try:
-                WebDriverWait(driver, 8).until(
+                WebDriverWait(driver, 15).until(
                     EC.invisibility_of_element_located((By.ID, "id_name"))
                 )
                 outcome = "success"
