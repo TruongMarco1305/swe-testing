@@ -5,6 +5,8 @@ cleanup_moodle.py - Delete test data created by Project #3 test suites
 WHAT THIS SCRIPT DELETES
   - Users with names matching the TC-001 patterns       (usr*, test_*, ...)
   - Courses with names matching the TC-002 patterns     (fn*, sn*, ...)
+    ONLY from Category 1 (Miscellaneous). "DO NOT DELETE" and all other
+    categories are never touched.
   - Assignments inside course 10 (TC-003)               (an*, a, as, ...)
   - Calendar events with TC-005 patterns                (t*, ti, ...)
   - Quizzes inside course 12 (TC-006 + NFR files)       (qn*, perf_*, xss_*)
@@ -202,10 +204,13 @@ def cleanup_users_bulk(driver, wait, dry_run=False):
         log_warn("Could not load bulk user actions page - falling back to per-user delete")
         return cleanup_users(driver, wait, dry_run=dry_run)
 
-    # Click "Show all" so every user is visible in the left listbox
+    # Click "Show all" so every user is visible in the Available listbox.
+    # Try multiple selectors — the button varies across Moodle versions.
     for sel in [(By.ID, "showall"),
                 (By.CSS_SELECTOR, "input[value*='Show all']"),
-                (By.CSS_SELECTOR, "button[name='showall']")]:
+                (By.CSS_SELECTOR, "button[name='showall']"),
+                (By.XPATH, "//input[@type='submit' and contains(@value,'Show all')]"),
+                (By.XPATH, "//button[contains(.,'Show all')]")]:
         try:
             btn = driver.find_element(*sel)
             driver.execute_script("arguments[0].click();", btn)
@@ -213,6 +218,9 @@ def cleanup_users_bulk(driver, wait, dry_run=False):
             break
         except NoSuchElementException:
             continue
+    else:
+        log_skip("'Show all' button not found — proceeding with visible users")
+        time.sleep(1)
 
     # Read all user options from the "Available users" listbox (#removeselect)
     options = driver.find_elements(By.CSS_SELECTOR, "select#removeselect option")
@@ -246,17 +254,26 @@ def cleanup_users_bulk(driver, wait, dry_run=False):
             log_dry(f"user {uid:>6}  '{display}'")
         return len(candidates)
 
-    # Select each matching user by their UID via the listbox
-    select_el = driver.find_element(By.ID, "removeselect")
-    deselect_others_js = """
-        var sel = arguments[0];
-        var ids = arguments[1];
-        for (var i = 0; i < sel.options.length; i++) {
-            sel.options[i].selected = ids.indexOf(parseInt(sel.options[i].value, 10)) !== -1;
-        }
-    """
-    driver.execute_script(deselect_others_js, select_el,
-                          [uid for uid, _ in candidates])
+    # Multi-select matching users with ActionChains (Ctrl+click) so that
+    # Moodle's listbox JS receives real mouse events and recognises the selection.
+    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.common.keys import Keys as _Keys
+
+    uid_values = {str(uid) for uid, _ in candidates}
+    matching_opts = [
+        opt for opt in driver.find_elements(By.CSS_SELECTOR, "select#removeselect option")
+        if (opt.get_attribute("value") or "").strip() in uid_values
+    ]
+    if not matching_opts:
+        log_warn("No matching options found in Available listbox — falling back to per-user delete")
+        return cleanup_users(driver, wait, dry_run=dry_run)
+
+    actions = ActionChains(driver)
+    actions.click(matching_opts[0])
+    for opt in matching_opts[1:]:
+        actions.key_down(_Keys.CONTROL).click(opt).key_up(_Keys.CONTROL)
+    actions.perform()
+    time.sleep(1)
 
     # Click "Add to selection"
     try:
@@ -427,169 +444,133 @@ def cleanup_users(driver, wait, dry_run=False):
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# 2. COURSES  -  /course/management.php
+# 2. COURSES  -  /course/management.php?categoryid=4  (Category 1 only)
+#    Uses the admin "Manage courses and categories" bulk-delete UI.
+#    Never touches "DO NOT DELETE" or any other category.
 # ══════════════════════════════════════════════════════════════════════════
 def cleanup_courses(driver, wait, dry_run=False, purge_all=False):
-    log_section("COURSES - enumerating via /my/courses.php + /my/")
-    # Strategy: visit the "My courses" dashboard pages which list every
-    # course the admin user owns/enrolls in. Set perpage high to load all.
-    sesskey = None
+    log_section("COURSES - /course/management.php?categoryid=4 (Category 1 only)")
+    # Use a large perpage so pagination is rarely needed.
+    MGMT_URL = f"{BASE_URL}/course/management.php?categoryid=4&perpage=200"
+
+    # ─── Phase 1: enumerate matching courses in Category 1 ────────────────
     candidates = []
-    seen_cids = set()
-    enum_urls = [
-        f"{BASE_URL}/my/courses.php?perpage=500",
-        f"{BASE_URL}/my/",
-        f"{BASE_URL}/course/index.php?perpage=500",
-    ]
-    for url in enum_urls:
+    seen_cids  = set()
+    page_num   = 0
+
+    while True:
+        url = MGMT_URL + (f"&page={page_num}" if page_num else "")
         driver.get(url)
         try:
             wait.until(EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".card, .coursebox, .course-listitem, h1, h2")))
+                (By.CSS_SELECTOR,
+                 "li.listitem-course, #course-listing, .management-course-listing")))
         except TimeoutException:
-            log_warn(f"Could not load {url}")
-            continue
-        time.sleep(2)
-        if sesskey is None:
-            sesskey = get_sesskey(driver)
-        # Each course tile/card on /my/courses.php has a link
-        #   /course/view.php?id=<cid>
-        # plus a heading with the fullname above the meta line.
-        links = driver.find_elements(By.CSS_SELECTOR, "a[href*='/course/view.php']")
-        log_step(f"{url.split(BASE_URL)[1]}: {len(links)} course links")
-        for link in links:
-            try:
-                href = link.get_attribute("href") or ""
-                m = re.search(r"[?&]id=(\d+)", href)
-                if not m:
-                    continue
-                cid = int(m.group(1))
-                if cid in PROTECTED_COURSE_IDS or cid in seen_cids:
-                    continue
-                # Get the visible course name from the link itself
-                name = (link.text or "").strip()
-                if not name:
-                    # try the title attribute, or surrounding card text
-                    name = (link.get_attribute("title") or "").strip()
-                if not name:
-                    try:
-                        card = link.find_element(By.XPATH,
-                            "./ancestor::*[contains(@class,'card') or contains(@class,'coursebox') or contains(@class,'course-listitem')][1]")
-                        name = (card.text or "").splitlines()[0]
-                    except Exception:
-                        name = f"id={cid}"
-                # Read the surrounding card text to also probe shortname/idnumber
-                surrounding = name
-                try:
-                    card = link.find_element(By.XPATH,
-                        "./ancestor::*[self::div or self::li][1]")
-                    surrounding = (card.text or "").strip()
-                except Exception:
-                    pass
-                # Strip whitespace before pattern matching
-                name = name.strip()
-                if purge_all:
-                    # --purge-courses: take every non-protected course (already
-                    # filtered above) without applying name patterns.
-                    seen_cids.add(cid)
-                    candidates.append((cid, name))
-                    continue
-                fullname_match = matches_any(name, COURSE_FULLNAME_PATTERNS) or \
-                                 any(matches_any(line.strip(), COURSE_FULLNAME_PATTERNS)
-                                     for line in surrounding.splitlines())
-                shortname_match = matches_any(name, COURSE_SHORTNAME_PATTERNS) or \
-                                  any(matches_any(line.strip(), COURSE_SHORTNAME_PATTERNS)
-                                      for line in surrounding.splitlines())
-                if fullname_match or shortname_match:
-                    seen_cids.add(cid)
-                    candidates.append((cid, name))
-            except (NoSuchElementException, ValueError):
+            if page_num == 0:
+                log_warn("Could not load /course/management.php — skipping course cleanup")
+                return 0
+            break
+
+        items = driver.find_elements(By.CSS_SELECTOR, "li.listitem-course")
+        if not items:
+            break
+
+        found_new = False
+        for li in items:
+            cid_raw = (li.get_attribute("data-id") or "").strip()
+            if not cid_raw.isdigit():
                 continue
+            cid = int(cid_raw)
+            if cid in seen_cids or cid in PROTECTED_COURSE_IDS:
+                continue
+            seen_cids.add(cid)
+            found_new = True
 
-    if sesskey is None:
-        # Make sure we have sesskey even if all searches failed
-        driver.get(f"{BASE_URL}/my/")
-        sesskey = get_sesskey(driver)
+            # Full name
+            name = ""
+            try:
+                name_el = li.find_element(By.CSS_SELECTOR,
+                    ".coursename a, a.coursename, .course-title a")
+                name = (name_el.text or "").strip()
+            except NoSuchElementException:
+                pass
+            if not name:
+                name = f"id={cid}"
 
-    log_step(f"Found {len(candidates)} test courses to delete (across {len(enum_urls)} enumeration URLs)")
+            # Short name (shown as "Short name: SN001" in the detail line)
+            short = ""
+            try:
+                short_el = li.find_element(By.CSS_SELECTOR,
+                    ".shortname, .course-shortname, [data-type='shortname']")
+                short = re.sub(r"^short\s*name\s*:?\s*", "",
+                               (short_el.text or "").strip(),
+                               flags=re.IGNORECASE).strip()
+            except NoSuchElementException:
+                pass
+
+            if purge_all:
+                candidates.append((cid, name))
+            elif (matches_any(name,  COURSE_FULLNAME_PATTERNS) or
+                  matches_any(short, COURSE_SHORTNAME_PATTERNS) or
+                  matches_any(name,  COURSE_SHORTNAME_PATTERNS)):
+                candidates.append((cid, name))
+
+        if not found_new:
+            break
+
+        # Advance to next page if a Next link exists
+        try:
+            driver.find_element(By.CSS_SELECTOR,
+                ".pagination .page-item:not(.disabled) a[aria-label='Next'], "
+                "a.next[href*='page='], a[rel='next']")
+            page_num += 1
+        except NoSuchElementException:
+            break
+
+    log_step(f"Found {len(candidates)} course(s) in Category 1 to {'list' if dry_run else 'delete'}")
     if not candidates:
         return 0
 
     if dry_run:
-        for cid, fullname in candidates:
-            display = (fullname[:60] + "...") if len(fullname) > 60 else fullname
+        for cid, name in candidates:
+            display = (name[:60] + "...") if len(name) > 60 else name
             log_dry(f"course {cid:>6}  '{display}'")
         return len(candidates)
 
-    # JS POST approach: fetch confirm page, parse form, submit it back.
-    # Handles Moodle's 2-step delete (preview + final confirmation) by
-    # following the redirect chain after the first POST.
-    driver.set_script_timeout(60)
-    js_course_delete = """
-        const done = arguments[arguments.length - 1];
-        const cid = arguments[0];
-        const sk  = arguments[1];
-        async function postForm(url) {
-            const r = await fetch(url, {credentials: 'include'});
-            const html = await r.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            // Prefer the form that points back at delete.php (the confirm form).
-            const form = doc.querySelector('form[action*="delete.php"]')
-                      || doc.querySelector('form');
-            if (!form) return {status: 'no-form', url: r.url};
-            const fd = new FormData(form);
-            // Ensure submit-button value is included (Moodle sometimes keys
-            // on this to distinguish the final confirm step).
-            doc.querySelectorAll('button[type=submit], input[type=submit]').forEach(b => {
-                if (b.name && b.value && !fd.has(b.name)) fd.set(b.name, b.value);
-            });
-            const params = new URLSearchParams();
-            fd.forEach((v, k) => params.append(k, v));
-            const r2 = await fetch(form.action, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: params.toString()
-            });
-            return {status: r2.status, url: r2.url};
-        }
-        (async () => {
-            try {
-                // Moodle 4.x course delete is a 3-step flow:
-                //   1) GET  /course/delete.php?id=N             -> initial confirm form
-                //   2) POST                                      -> "are you sure?" page (still delete.php)
-                //   3) POST                                      -> actual delete, redirects to /course/management.php
-                // Loop until the response URL leaves delete.php OR we exhaust 5 hops.
-                let last = await postForm('/course/delete.php?id=' + cid);
-                if (typeof last.status !== 'number') return done(last);
-                for (let i = 0; i < 4; i++) {
-                    if (!last.url || last.url.indexOf('delete.php') === -1) break;
-                    last = await postForm(last.url);
-                    if (typeof last.status !== 'number') return done(last);
-                }
-                done(last);
-            } catch (e) { done({status: 'err', error: e.message}); }
-        })();
-    """
+    # ─── Phase 2: per-course delete via /course/delete.php?id=N ──────────
+    # Moodle Cloud's management page does not reliably expose the bulk-action
+    # <select> in its DOM (it is JS-gated and varies by version).  Deleting
+    # one course at a time via the dedicated delete endpoint is simpler and
+    # works with every Moodle version / hosting arrangement.
     deleted = 0
-    for cid, fullname in candidates:
-        display = (fullname[:60] + "...") if len(fullname) > 60 else fullname
+    for cid, name in candidates:
+        display = (name[:60] + "...") if len(name) > 60 else name
         try:
-            result = driver.execute_async_script(js_course_delete, cid, sesskey)
-            status = result.get("status") if isinstance(result, dict) else result
-            final_url = result.get("url", "") if isinstance(result, dict) else ""
-            if isinstance(status, int) and status in (200, 302, 303):
-                committed = "delete.php" not in final_url
-                if committed:
-                    log_del(f"course {cid:>6}  HTTP {status}  '{display}'")
-                    deleted += 1
-                else:
-                    log_skip(f"course {cid:>6}  HTTP {status} still on delete.php (multi-step)")
-            else:
-                log_skip(f"course {cid:>6}  result={result}")
-        except WebDriverException as e:
-            log_warn(f"course {cid}  '{display}' - {e.__class__.__name__}")
+            driver.get(f"{BASE_URL}/course/delete.php?id={cid}")
+            # Wait for the confirmation page form to load
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "form, .confirmation-dialogue, .mform")))
+            # Click the "Delete" / "Yes" confirm button
+            confirm_btn = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((
+                By.XPATH,
+                "//button[normalize-space(.)='Delete'] | "
+                "//input[@type='submit' and @value='Delete'] | "
+                "//button[normalize-space(.)='Yes'] | "
+                "//input[@type='submit' and @value='Yes'] | "
+                "//button[contains(@class,'btn-danger') and contains(.,'Delete')]"
+            )))
+            driver.execute_script(
+                "arguments[0].scrollIntoView({block:'center'});", confirm_btn)
+            driver.execute_script("arguments[0].click();", confirm_btn)
+            time.sleep(2)   # give Moodle time to process; no redirect check needed
+            log_del(f"course {cid:>6}  '{display}'")
+            deleted += 1
+        except (TimeoutException, NoSuchElementException) as exc:
+            log_warn(f"course {cid}  '{display}' - {exc.__class__.__name__}")
+        except WebDriverException as exc:
+            log_warn(f"course {cid}  '{display}' - {exc.__class__.__name__}")
+
     return deleted
 
 

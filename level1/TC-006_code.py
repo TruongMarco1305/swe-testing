@@ -19,7 +19,7 @@ BASE_URL   = "https://xuansang1234.moodlecloud.com"
 ADMIN_USER = "sang.truong2005@hcmut.edu.vn"
 ADMIN_PASS = "Abcdxyz12@"
 COURSE_ID  = 12
-SECTION_ID = 39
+SECTION_ID = 49
 QUIZ_URL   = (
     f"{BASE_URL}/course/modedit.php"
     f"?add=quiz&type&course={COURSE_ID}&sectionid={SECTION_ID}&return=0&beforemod=0"
@@ -181,9 +181,13 @@ class TestQuizLevel1(unittest.TestCase):
             if (banner) banner.style.display = 'none';
         """)
 
-        driver.find_element(By.ID, "username").send_keys(ADMIN_USER)
-        driver.find_element(By.ID, "password").send_keys(ADMIN_PASS)
-        driver.execute_script("document.getElementById('loginbtn').click();")
+        driver.execute_script("""
+            var u = document.getElementById('username');
+            var p = document.getElementById('password');
+            if (u) { u.value = arguments[0]; u.dispatchEvent(new Event('input', {bubbles:true})); }
+            if (p) { p.value = arguments[1]; p.dispatchEvent(new Event('input', {bubbles:true})); }
+            document.getElementById('loginbtn').click();
+        """, ADMIN_USER, ADMIN_PASS)
         wait.until(EC.url_contains("/my/"))
         time.sleep(2)
 

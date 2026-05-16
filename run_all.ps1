@@ -135,6 +135,7 @@ function Invoke-Smoke {
     Push-Location $Level1Dir
     & python -m pytest TC-006_code.py -v -k "TC_006_001"
     Pop-Location
+    Invoke-CleanupAuto
 }
 
 function Invoke-Level1 {
@@ -142,6 +143,7 @@ function Invoke-Level1 {
     Push-Location $Level1Dir
     & python -m pytest . -v
     Pop-Location
+    Invoke-CleanupAuto
 }
 
 function Invoke-Level2 {
@@ -149,6 +151,7 @@ function Invoke-Level2 {
     Push-Location $Level2Dir
     & python -m pytest TC-ALL.py -v
     Pop-Location
+    Invoke-CleanupAuto
 }
 
 function Invoke-Nfr {
@@ -161,6 +164,7 @@ function Invoke-Nfr {
                        TC-005.py `
                        TC-006.py -v
     Pop-Location
+    Invoke-CleanupAuto
 }
 
 function Invoke-Tc {
@@ -185,6 +189,18 @@ function Invoke-Tc {
     Write-Step "NFR: TC-${Num}.py"
     & python -m pytest "TC-${Num}.py" -v
     Pop-Location
+    Invoke-CleanupAuto
+}
+
+function Invoke-CleanupAuto {
+    Write-Section "AUTO CLEANUP - removing Level 1 test data before Level 2"
+    Write-Step "Running cleanup (all categories, no confirmation prompt)..."
+    & python (Join-Path $RepoRoot "cleanup_moodle.py") --all
+    if ($LASTEXITCODE -eq 0) {
+        Write-OK "Cleanup complete"
+    } else {
+        Write-Fail "Cleanup reported errors (exit $LASTEXITCODE) - continuing anyway"
+    }
 }
 
 function Invoke-Cleanup {
