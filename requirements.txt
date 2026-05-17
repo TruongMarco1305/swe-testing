@@ -1,6 +1,6 @@
 # Project #3 — Group 11 · Software Testing 2025S2
 # Install all packages:    pip install -r requirements.txt
-# Verify install:          python -c "import selenium, locust, zapv2, axe_selenium_python; print('OK')"
+# Verify install:          python -c "import selenium, locust, axe_selenium_python; print('OK')"
 
 # ── Level 1 & Level 2 (Selenium data-driven) ──────────────────────────────
 selenium>=4.10              # WebDriver core

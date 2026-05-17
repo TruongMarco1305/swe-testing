@@ -14,9 +14,14 @@ Requires Python 3.9+ and Google Chrome. `webdriver-manager` auto-downloads the m
 
 ```powershell
 pip install -r requirements.txt
-# or use the helper:
-.\install_nfr_deps.ps1
 ```
+
+---
+
+> [!WARNING]
+> **Run all tests manually in your own terminal.**
+> Do **not** execute pytest / Selenium scripts through an AI agent terminal (e.g. GitHub Copilot, Cursor, or any IDE agent runner).
+> Agent-managed terminal sessions may interfere with Chrome's DevTools Protocol, steal focus from the browser window, or terminate the WebDriver process mid-test — causing spurious failures or a broken browser session that cannot be recovered.
 
 ---
 
